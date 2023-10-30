@@ -49,6 +49,55 @@ go_down (B1 t1 c,t) = Just (c,B t1 t)    -- focus on parent *from* right child
 go_down (Hole,t)    = Nothing            -- (root => no parent)
 
 
-runGame :: SelectMonad m => (Board -> m (Maybe Cell)) -> (Board -> m (Maybe Cell)) -> Board -> m Board
-let flag = NoFlag
-runGame = undefined
+check_action :: Item -> Bin Item -> Bool
+check_action item (Leaf (Just i)) = item == i
+check_action item (Node (Just i) _ _) = item == i
+check_action _ _ = False
+
+emptyNode :: Bin Item -> Bin Item
+emptyNode (Leaf _) = Leaf Nothing
+emptyNode (Node _ left right) = Node Nothing left right
+
+Do_Collect :: Bin Item -> IO (Maybe (Bin Item))
+Do_Collect node = do
+    if check_action Rock node
+    then do
+        putStrLn "Collected !"
+        return (emptyNode node)
+    else
+        putStrLn "Nothing to collect"
+        return Nothing
+
+
+Do_Shoot :: Bin Item -> IO (Maybe (Bin Item))
+Do_Shoot node = do
+    if check_action Spider node
+    then do
+        putStrLn "Killed !"
+        return (emptyNode node)
+    else
+        putStrLn "Nothing to kill"
+        return Nothing
+
+
+Do_Feed :: Bin Item -> IO (Maybe (Bin Item))
+Do_Feed node = do
+    if check_action Spider node
+    then do
+        putStrLn "Fed !"
+        return (emptyNode node)
+    else
+        putStrLn "Nothing to feed"
+        return Nothing
+
+
+
+
+
+
+
+
+
+
+
+
