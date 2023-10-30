@@ -1,11 +1,11 @@
 {-# OPTIONS_GHC -Wno-noncanonical-monad-instances #-}
 module Parser (runParser, parseCmd, parseInput) where
 
-import Cmd
-import Data.Maybe
-import Data.Char
+import Cmd ( Cmd(..) )
+import Data.Maybe ()
+import Data.Char ( toLower )
 
-import Control.Applicative
+import Control.Applicative ( Alternative((<|>), empty) )
 
 -- redefining Parser
 newtype Parser tok a = Parser { runParser :: [tok] -> Maybe (a,[tok]) }
