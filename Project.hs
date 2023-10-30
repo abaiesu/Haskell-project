@@ -1,6 +1,4 @@
 data Item = Rock | Spider | Baby 
     deriving (Show, Eq)
-data MaybeItem = Maybe Item
-    deriving (Show, Eq)
-data Bin Item = Leaf Item | Node Item (Bin Item) (Bin Item)
+data Bin (Maybe Item) = Leaf (Maybe Item) | Node (Maybe Item) (Bin (Maybe Item)) (Bin (Maybe Item))
     deriving (Show, Eq)
