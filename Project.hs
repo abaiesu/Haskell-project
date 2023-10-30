@@ -1,4 +1,4 @@
 data Item = Nothing | Rock | Spider | Baby 
     deriving (Show, Eq)
-data Bin = Leaf Item | Node Item Bin Bin 
+data Bin Item = Leaf Item | Node Item (Bin Item) (Bin Item)
     deriving (Show, Eq)
