@@ -79,9 +79,8 @@ parseClimb = do
    (match "left" >> return Go_Left) <|>
    (match "right" >> return Go_Right) <|>
    (match "flag">> return Go_Flag) 
-  match "Left" >> return Go_Left
-  match "Right" >> return Go_Right
-  match "Flag" >> return Go_Flag
+  match "left" >> return Go_Left
+  match "right" >> return Go_Right
   match "back" >> return Go_Back
 -- Parse an action command
 parseAction :: Parser String Cmd
@@ -94,7 +93,6 @@ parseAction = do
     match "shoot" >> return Do_Shoot
     match "collect" >> return Do_Collect
     match "feed" >> return Do_Feed
-    match "flag" >> return Place_Flag
 
 -- Parse a quit command
 parseQuit :: Parser String Cmd
