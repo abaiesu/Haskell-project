@@ -39,11 +39,13 @@ repl = do
                 go z
 
             Just Go_Left ->
-                case z of
+                putStrLn "Not implemented"
+                {--case z of
                     (c, Node item t1 t2) -> go (B0 c t2, t1)
                     (c, Leaf _) -> do
                         putStrLn "You cannot climb any further."
                         go z
+                --}
 
 
             Just Go_Right ->
