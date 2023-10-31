@@ -75,7 +75,7 @@ parseCmd = parseClimb <|> parseAction <|> parseQuit
 parseClimb :: Parser String Cmd
 parseClimb = do
   match "climb" <|> match "go"
-  (match "down" >> return Go_Back) <|>
+  (match "back" >> return Go_Back) <|>
    (match "left" >> return Go_Left) <|>
    (match "right" >> return Go_Right) <|>
    (match "flag">> return Go_Flag) 

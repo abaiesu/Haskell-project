@@ -15,15 +15,14 @@ repl = do
     go :: BinZip Item -> IO ()
     go z = do
         case z of
-            (Hole, Leaf Nothing) -> putStrLn "You see an empty leaf."
-            (Hole, Leaf (Just item)) -> putStrLn $ "You see a leaf with a " ++ show item
-            (Hole, Node Nothing _ _) -> putStrLn "You see an empty binary node"
-            (Hole, Node (Just item) _ _) -> putStrLn $ "You see a binary node with a " ++ show item
+            (_, Leaf Nothing) -> putStrLn "You see an empty leaf."
+            (_, Leaf (Just item)) -> putStrLn $ "You see a leaf with a " ++ show item
+            (_, Node Nothing _ _) -> putStrLn "You see an empty binary node"
+            (_, Node (Just item) _ _) -> putStrLn $ "You see a binary node with a " ++ show item
             
         putStr "> "
         hFlush stdout
         line <- getLine                                  -- get a line of input
-        putStrLn $ "Parsed input: " ++ line
         case parseInput parseCmd line of       
             
             Nothing -> do
@@ -40,10 +39,14 @@ repl = do
 
             Just Go_Left ->
                 case z of
-                    (c, Node item t1 t2) -> go (B0 c t2, t1)
+                    (c, Node _ t1 t2) -> go (B0 c t2, t1)
                     (c, Leaf _) -> do
                         putStrLn "You cannot climb any further."
                         go z
+
+            --
+            --Node (Nothing) (Leaf (Just Rock)) (Node (Just Spider) (Leaf (Nothing)) (Leaf (Just Baby)))
+            --
 
 
             Just Go_Right ->
