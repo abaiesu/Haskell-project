@@ -73,26 +73,40 @@ parseCmd = parseClimb <|> parseAction <|> parseQuit
 
 -- Parse a climbing or going command.
 -- Parse a climbing or going command.
+-- Parse a climbing or going command.
+-- Parse a climbing or going command.
 parseClimb :: Parser String Cmd
 parseClimb = do
-    token <- match "go" <|> match "left" <|> match "right" <|> match "back" <|> match "jflag" 
-    case map toLower token of
-        "back" -> return Go_Back
-        "left" -> return Go_Left
-        "right" -> return Go_Right
-        "jflag" -> return Go_Flag
-        _ -> empty
+    token1 <- match "go" <|> return "go"
+    token2 <- sat isDirection
+    return $ case map toLower token2 of
+        "left" -> Go_Left
+        "right" -> Go_Right
+        "back" -> Go_Back
+        "jflag" -> Go_Flag
+        _ -> Go_Flag
+  where
+    isDirection :: String -> Bool
+    isDirection s = map toLower s `elem` ["left", "right", "back", "jflag", "flag"]
 
+
+
+-- Parse an action command
 -- Parse an action command
 parseAction :: Parser String Cmd
 parseAction = do
-    token <- match "place"  <|> match "do" <|> match "shoot" <|> match " collect" <|> match "feed" <|> match "pflag" 
-    case map toLower token of
-      "shoot" -> return Do_Shoot
-      "collect" -> return Do_Collect
-      "feed" -> return Do_Feed
-      "pflag" -> return Place_Flag
-      _ -> empty
+    token1 <- (match "place" <|> match "do" <|> return "")
+    token2 <- sat isAction
+    return $ case map toLower token2 of
+        "shoot" -> Do_Shoot
+        "collect" -> Do_Collect
+        "feed" -> Do_Feed
+        "pflag" -> Place_Flag
+        _ -> Place_Flag -- Default to Do_Feed for single-word commands
+  where
+    isAction :: String -> Bool
+    isAction s = map toLower s `elem` ["shoot", "collect", "feed", "pflag", "flag"]
+
 
 -- Parse a quit command
 parseQuit :: Parser String Cmd
@@ -105,3 +119,4 @@ parseInput :: MonadFail m => Parser String a -> String -> m a
 parseInput p s = case runParser p (words s) of
                    Just (x,ts') -> if null ts' then return x else fail "parseInput: some tokens left"
                    Nothing -> fail "parseInput: failed to parse"
+
