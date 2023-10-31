@@ -1,14 +1,18 @@
+module Bin where
+
 data Item = Rock | Spider | Baby
     deriving (Show, Eq)
 
 data Bin a = Leaf (Maybe a) | Node (Maybe a) (Bin a) (Bin a)
     deriving (Show, Eq)
     
-data BinCxt a = Hole | B0 (BinCxt a) | B1 (BinCxt a)
+data BinCxt a = Hole | B0 (BinCxt a) (Bin a) | B1 (Bin a) (BinCxt a)
     deriving (Show, Eq)
 
 data UpdatableFlag a = NoFlag | Flag (BinCxt a)
     deriving (Show, Eq)
+
+type BinZip a = (BinCxt a, Bin a)
 
 
 -- This will print all the items found on the tree 
@@ -27,26 +31,23 @@ printLabels (Node (Just item) left right) = do
 --test_tree1 = Node (Just Rock) (Leaf (Just Spider)) (Leaf (Just Baby)) 
 --test_tree2 = Node (Nothing) (Leaf (Just Rock)) (Node (Just Spider) (Leaf (Nothing)) (Leaf (Just Spider)))
 
-plug :: BinCxt -> Bin -> Bin
-plug Hole      t = t
-plug (B0 c t2) t = plug c (B t t2)
-plug (B1 t1 c) t = plug c (B t1 t)
+{-plug :: BinCxt a -> Bin a -> Bin a
+plug Hole t = t
+plug (B0 c x) t = Node x t (plug c t)
+plug (B1 x c) t = Node x (plug c t) t-}
 
+{-go_left :: BinZip a -> Maybe (BinZip a)
+go_left (c, Node x t1 t2) = Just (B0 c x, t1)  -- Focus on the left child
+go_left (c, Leaf _) = Nothing  -- Leaf has no left child
 
-type BinZip = (BinCxt,Bin)
+go_right :: BinZip a -> Maybe (BinZip a)
+go_right (c, Node x t1 t2) = Just (B1 x c, t2)  -- Focus on the right child
+go_right (c, Leaf _) = Nothing  -- Leaf has no right child
 
-go_left :: BinZip -> Maybe BinZip
-go_left (c,B t1 t2) = Just (B0 c t2,t1)  -- focus on the left child
-go_left (c,L)       = Nothing            -- (leaf => no left child)
-
-go_right :: BinZip -> Maybe BinZip
-go_right (c,B t1 t2) = Just (B1 t1 c,t2) -- focus on the right child
-go_right (c,L)       = Nothing           -- (leaf => no right child)
-
-go_down :: BinZip -> Maybe BinZip
-go_down (B0 c t2,t) = Just (c,B t t2)    -- focus on parent *from* left child
-go_down (B1 t1 c,t) = Just (c,B t1 t)    -- focus on parent *from* right child
-go_down (Hole,t)    = Nothing            -- (root => no parent)
+go_down :: BinZip a -> Maybe (BinZip a)
+go_down (B0 c x, t) = Just (c, Node x t (Leaf Nothing))  -- Focus on parent from the left child
+go_down (B1 x c, t) = Just (c, Node x (Leaf Nothing) t)  -- Focus on parent from the right child
+go_down (Hole, _) = Nothing  -- Root has no parent-}
 
 
 check_action :: Item -> Bin Item -> Bool
@@ -58,35 +59,35 @@ emptyNode :: Bin Item -> Bin Item
 emptyNode (Leaf _) = Leaf Nothing
 emptyNode (Node _ left right) = Node Nothing left right
 
-Do_Collect :: Bin Item -> IO (Maybe (Bin Item))
-Do_Collect node = do
+do_collect :: Bin Item -> IO (Maybe (Bin Item))
+do_collect node = do
     if check_action Rock node
     then do
         putStrLn "Collected !"
-        return (emptyNode node)
-    else
+        return (Just (emptyNode node))
+    else do
         putStrLn "Nothing to collect"
         return Nothing
 
 
-Do_Shoot :: Bin Item -> IO (Maybe (Bin Item))
-Do_Shoot node = do
+do_shoot :: Bin Item -> IO (Maybe (Bin Item))
+do_shoot node = do
     if check_action Spider node
     then do
         putStrLn "Killed !"
-        return (emptyNode node)
-    else
+        return (Just (emptyNode node))
+    else do
         putStrLn "Nothing to kill"
         return Nothing
 
 
-Do_Feed :: Bin Item -> IO (Maybe (Bin Item))
-Do_Feed node = do
+do_feed :: Bin Item -> IO (Maybe (Bin Item))
+do_feed node = do
     if check_action Spider node
     then do
         putStrLn "Fed !"
-        return (emptyNode node)
-    else
+        return (Just (emptyNode node))
+    else do
         putStrLn "Nothing to feed"
         return Nothing
 
