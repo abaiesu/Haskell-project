@@ -72,12 +72,8 @@ repl= do
     putStrLn "Welcome to the Hive!\n"
     putStrLn "You must kill spiders and feed the babies."
     tree <- generateTree 5
-    initialState :: BinZip Item
-    initialState = (Hole, tree)
-
-    game :: GameState
-    game = GameState {
-      binZip = initialState,
+    let game = GameState {
+      binZip = (Hole, tree),
       rocksCollected = 0,
       spidersKilled = 0,
       points = 0
