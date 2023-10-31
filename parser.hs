@@ -72,22 +72,27 @@ parseCmd :: Parser String Cmd
 parseCmd = parseClimb <|> parseAction <|> parseQuit
 
 -- Parse a climbing or going command.
+-- Parse a climbing or going command.
 parseClimb :: Parser String Cmd
 parseClimb = do
-  match "climb" <|> match "go"
-  (match "back" >> return Go_Back) <|>
-   (match "left" >> return Go_Left) <|>
-   (match "right" >> return Go_Right) <|>
-   (match "flag">> return Go_Flag) 
+    token <- match "go" <|> match "left" <|> match "right" <|> match "back" <|> match "jflag" 
+    case map toLower token of
+        "back" -> return Go_Back
+        "left" -> return Go_Left
+        "right" -> return Go_Right
+        "jflag" -> return Go_Flag
+        _ -> empty
 
 -- Parse an action command
 parseAction :: Parser String Cmd
 parseAction = do
-    match "place"  <|> match "do"
-    (match "shoot" >> return Do_Shoot) <|> 
-     (match "collect" >> return Do_Collect) <|> 
-     (match "feed" >> return Do_Feed) <|>
-     (match "flag">> return Place_Flag) 
+    token <- match "place"  <|> match "do" <|> match "shoot" <|> match " collect" <|> match "feed" <|> match "pflag" 
+    case map toLower token of
+      "shoot" -> return Do_Shoot
+      "collect" -> return Do_Collect
+      "feed" -> return Do_Feed
+      "pflag" -> return Place_Flag
+      _ -> empty
 
 -- Parse a quit command
 parseQuit :: Parser String Cmd

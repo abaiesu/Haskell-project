@@ -3,17 +3,72 @@ import Cmd
 import Parser
 
 import System.IO
+import System.Random
+import Data.Maybe (isJust)
 import Control.Concurrent (threadDelay)
+
+
+-- generate a random Item (Rock, Baby, Spider, or Nothing) with 50% probability of Nothing
+randomItem :: IO (Maybe Item)
+randomItem = do
+    randomNumber <- randomIO :: IO Int
+    if randomNumber `mod` 2 == 0 -- First choose between Nothing or Just an item
+        then return Nothing
+        else do -- Then choose among the 3 possible items
+            let n = randomNumber `mod` 3
+            case n of
+                0 -> return (Just Rock)
+                1 -> return (Just Baby)
+                _ -> return (Just Spider)
+
+generateTree :: Int -> IO (Bin Item)
+generateTree 0 = do
+    item <- randomItem
+    return (Leaf item)
+generateTree depth = do
+    item <- randomItem
+    leftSubtree <- generateTree (depth - 1)
+    rightSubtree <- generateTree (depth - 1)
+    return (Node item leftSubtree rightSubtree)
+
+
+
+
+prettyPrintBin :: Show a => Int -> Bin a -> String
+prettyPrintBin maxDepth bin = prettyPrintBin' 0 "" True bin
+  where
+    prettyPrintBin' currentDepth prefix isTail bin =
+        case bin of
+            Leaf Nothing ->
+                prefix ++ "└── Empty\n"
+            Leaf (Just x) ->
+                prefix ++ "└── " ++ show x ++ "\n"
+            Node Nothing left right ->
+                if currentDepth == (maxDepth - 1) 
+                then prefix ++ "└── " ++ "Empty" ++ "..." ++ "\n"
+                else prefix ++ "└── " ++ "Empty" ++ "\n" ++
+                    prettyPrintBin' (currentDepth + 1) (prefix ++ (if isTail then "    " else "│   ")) True left ++
+                    prettyPrintBin' (currentDepth + 1) (prefix ++ (if isTail then "    " else "│   ")) False right 
+            Node (Just x) left right ->
+                if currentDepth == (maxDepth - 1) 
+                then prefix ++ "└── " ++ show x ++ "..." ++ "\n"
+                else prefix ++ "└── " ++ show x ++ "\n" ++
+                    prettyPrintBin' (currentDepth + 1) (prefix ++ (if isTail then "    " else "│   ")) True left ++
+                    prettyPrintBin' (currentDepth + 1) (prefix ++ (if isTail then "    " else "│   ")) False right 
+            
+
 
 -- the top-level interactive loop
 repl :: IO ()
 repl = do
     putStrLn "Welcome to the Hive!\n"
     putStrLn "You must kill spiders and feed the babies."
-    go (Hole, test_tree2)  -- Assuming you have defined test_tree2 correctly
+    tree <- generateTree 5
+    go (Hole, tree)  
   where
     go :: BinZip Item -> IO ()
     go z = do
+        putStrLn (prettyPrintBin 3 (snd z))
         case z of
             (_, Leaf Nothing) -> putStrLn "You see an empty leaf."
             (_, Leaf (Just item)) -> putStrLn $ "You see a leaf with a " ++ show item
@@ -97,6 +152,47 @@ repl = do
                 return ()
 
 
-test_tree2 = Node (Nothing) (Leaf (Just Rock)) (Node (Just Spider) (Leaf (Nothing)) (Leaf (Just Baby)))
+
+
 
 main = repl
+
+
+{-prettyPrintBin :: Show a => Int -> Bin a -> String
+prettyPrintBin maxDepth bin = prettyPrintBin' 0 "" True bin
+  where
+    prettyPrintBin' currentDepth prefix isTail bin =
+
+        case bin of
+            Leaf Nothing ->
+                prefix ++ "└── Empty\n"
+            Leaf (Just x) ->
+                prefix ++ "└── " ++ show x ++ "\n"
+            Node Nothing left right ->
+                prefix ++ "└── Empty " ++ if (currentDepth == (maxDepth - 1)) then "..." else "" ++ "\n" ++ 
+                prettyPrintBin' (currentDepth + 1) (prefix ++ (if isTail then "    " else "│   ")) True left ++
+                prettyPrintBin' (currentDepth + 1) (prefix ++ (if isTail then "    " else "│   ")) False right
+            Node (Just x) left right ->
+                prefix ++ "└── " ++ show x ++ if (currentDepth == (maxDepth - 1)) then "..." else "" ++ "\n" ++
+                prettyPrintBin' (currentDepth + 1) (prefix ++ (if isTail then "    " else "│   ")) True left ++
+                prettyPrintBin' (currentDepth + 1) (prefix ++ (if isTail then "    " else "│   ")) False right
+
+    hasDeeperLevels (Node _ _ _) = True
+    hasDeeperLevels (Leaf _) = False-}
+
+
+
+
+
+{-main :: IO ()
+main = do
+  let tree1 =
+        Node (Just 1)
+          (Node (Just 2) (Leaf (Just 3)) (Node Nothing (Leaf Nothing) (Leaf (Just 5))))
+          (Node (Just 4) (Leaf (Just 5)) (Node (Just 6) (Leaf (Just 7)) (Leaf (Just 8))))
+    
+  tree2 <- generateTree 2
+
+  --putStrLn (prettyPrintBin 3 tree1)
+  --putStrLn "\n\n"
+  putStrLn (prettyPrintBin 3 tree2)-}
