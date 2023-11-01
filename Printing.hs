@@ -346,7 +346,8 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             --          2               3
             --          -----------------
             --                  |    
-            --                  1               
+            --                  1 
+            --              YOU |              
             putStr $ replicate 6 ' '
             putStr $ replicate 22 ' ' ++ printItem (l1 !! 0) 
             putStrLn ""
