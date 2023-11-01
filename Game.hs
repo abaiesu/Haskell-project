@@ -16,33 +16,8 @@ data GameState = GameState {
 }
 
 
--- generate a random Item (Rock, Baby, Spider, or Nothing) with 50% probability of Nothing
-randomItem :: IO (Maybe Item)
-randomItem = do
-    randomNumber <- randomIO :: IO Int
-    if randomNumber `mod` 2 == 0 -- First choose between Nothing or Just an item
-        then return Nothing
-        else do -- Then choose among the 3 possible items
-            let n = randomNumber `mod` 3
-            case n of
-                0 -> return (Just Rock)
-                1 -> return (Just Baby)
-                _ -> return (Just Spider)
 
-generateTree :: Int -> IO (Bin Item)
-generateTree 0 = do
-    item <- randomItem
-    return (Leaf item)
-generateTree depth = do
-    item <- randomItem
-    leftSubtree <- generateTree (depth - 1)
-    rightSubtree <- generateTree (depth - 1)
-    return (Node item leftSubtree rightSubtree)
-
-
-
-
-prettyPrintBin :: Show a => Int -> Bin a -> String
+{-prettyPrintBin :: Show a => Int -> Bin a -> String
 prettyPrintBin maxDepth bin = prettyPrintBin' 0 "" True bin
   where
     prettyPrintBin' currentDepth prefix isTail bin =
@@ -66,6 +41,23 @@ prettyPrintBin maxDepth bin = prettyPrintBin' 0 "" True bin
             
 
 
+main :: IO ()
+main = do
+  let tree1 =
+        Node (Just 1)
+          (Node (Just 2) (Leaf (Just 3)) (Node Nothing (Leaf Nothing) (Leaf (Just 5))))
+          (Node (Just 4) (Leaf (Just 5)) (Node (Just 6) (Leaf (Just 7)) (Leaf (Just 8))))
+    
+  tree2 <- generateTree 2
+
+  putStrLn (prettyPrintBin 3 tree1)
+  --putStrLn "\n\n"
+  --putStrLn (prettyPrintBin 3 tree2)-}
+
+
+
+
+
 -- the top-level interactive loop
 repl :: IO ()
 repl= do
@@ -78,7 +70,7 @@ repl= do
       spidersKilled = 0,
       points = 0
     }
-    go game  -- Assuming you have defined test_tree2 correctly
+    go game  
   where
     go :: GameState -> IO ()
     go gameState = do
@@ -190,7 +182,7 @@ repl= do
                 putStrLn "You ended the game over here:\n"
                 --putStrLn (drawBinZip z)
                 putStrLn "Goodbye."
-                return ()
+                return () 
 
 
 
@@ -199,42 +191,3 @@ repl= do
 
 main = repl
 
-
-{-prettyPrintBin :: Show a => Int -> Bin a -> String
-prettyPrintBin maxDepth bin = prettyPrintBin' 0 "" True bin
-  where
-    prettyPrintBin' currentDepth prefix isTail bin =
-
-        case bin of
-            Leaf Nothing ->
-                prefix ++ "└── Empty\n"
-            Leaf (Just x) ->
-                prefix ++ "└── " ++ show x ++ "\n"
-            Node Nothing left right ->
-                prefix ++ "└── Empty " ++ if (currentDepth == (maxDepth - 1)) then "..." else "" ++ "\n" ++ 
-                prettyPrintBin' (currentDepth + 1) (prefix ++ (if isTail then "    " else "│   ")) True left ++
-                prettyPrintBin' (currentDepth + 1) (prefix ++ (if isTail then "    " else "│   ")) False right
-            Node (Just x) left right ->
-                prefix ++ "└── " ++ show x ++ if (currentDepth == (maxDepth - 1)) then "..." else "" ++ "\n" ++
-                prettyPrintBin' (currentDepth + 1) (prefix ++ (if isTail then "    " else "│   ")) True left ++
-                prettyPrintBin' (currentDepth + 1) (prefix ++ (if isTail then "    " else "│   ")) False right
-
-    hasDeeperLevels (Node _ _ _) = True
-    hasDeeperLevels (Leaf _) = False-}
-
-
-
-
-
-{-main :: IO ()
-main = do
-  let tree1 =
-        Node (Just 1)
-          (Node (Just 2) (Leaf (Just 3)) (Node Nothing (Leaf Nothing) (Leaf (Just 5))))
-          (Node (Just 4) (Leaf (Just 5)) (Node (Just 6) (Leaf (Just 7)) (Leaf (Just 8))))
-    
-  tree2 <- generateTree 2
-
-  --putStrLn (prettyPrintBin 3 tree1)
-  --putStrLn "\n\n"
-  putStrLn (prettyPrintBin 3 tree2)-}
