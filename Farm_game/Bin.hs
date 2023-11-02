@@ -66,16 +66,16 @@ else do
     return Nothing
 
 -- gives the zipper after going 1 back
--- arguement is the Binzip
-go_backer :: BinZip Item -> BinZip Item
-go_backer (hole, t) = (hole, t)
-go_backer (b, t) = case pathFather b of
+-- arguement is a Binzip
+go_back :: BinZip Item -> BinZip Item
+go_back (hole, t) = (hole, t)
+go_back (b, t) = case pathFather b of
   hole -> (hole, t)
   (B0 a b1 b2) -> (b1, Node a b2 t)
   (B1 a b1 b2) -> (b2, Node a t b1)
 
 -- father of the current node
--- arguements are the context 
+-- arguement is a context 
 pathFather :: BinCxt Item -> BinCxt Item
 pathFather hole = hole
 pathFather (B0 a b1 b2) = b1
@@ -123,7 +123,7 @@ generateTree depth = do
   return (Node item leftSubtree rightSubtree)
 
 -- switches the bool i.e. if there are no crops then grows them or if there are then destroys them
--- arguements are the tree
+-- arguements is the tree
 switchBool :: Bin Item -> IO (Bin Item)
 switchBool (Leaf (b, item)) = return (Leaf (not b, item))
 switchBool (Node (b, item) left right) = return (Node (not b, item) left right)

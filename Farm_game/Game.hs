@@ -126,7 +126,7 @@ repl= do
                         putStrLn "You cannot go back any further."
                         go gameState
                     b -> do
-                        let newGameState = gameState { binZip = go_backer b }
+                        let newGameState = gameState { binZip = go_back b }
                         go newGameState
 
 
