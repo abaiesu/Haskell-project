@@ -386,4 +386,4 @@ main = do
     
     let cs = [[(Just Baby)], [Nothing, Nothing]]
 
-    prettyPrintHelper lists cs (Just Rock) 1
+    prettyPrintHelper lists cs (Just Rock) 2
