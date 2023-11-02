@@ -108,15 +108,30 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
     then putStrLn "Error: The provided list isn't a valid tree"
     else do 
 
-        -- FURTHER CHILDREN
         putStr $ replicate 6 ' '
         putStr " "
-        putStr $ concatMap (\i -> if l4 !! i == (Just NonExistant) then " " else "\\/" ++ replicate 12 ' ') [0, 2, 4, 6]
+        putStr (if l4 !! 0 == (Just NonExistant) then "+" else "\\/") --check if grandchild 1 has children (0 and 1)
+        setSGR [SetColor Foreground Dull Blue] --put the field separtion
+        putStr "-------------"
+        setSGR [Reset]
+
+        putStr (if l4 !! 2 == (Just NonExistant) then "+" else "\\/") --check if grandchild 2 has children (2 and 3)
+        putStr $ replicate 13 ' '
+
+        putStr (if l4 !! 4 == (Just NonExistant) then "+" else "\\/") --check if grandchild 3 has children (4 and 5)
+        setSGR [SetColor Foreground Dull Blue] --put the field separtion
+        putStr "-------------"
+        setSGR [Reset]
+
+        putStr (if l4 !! 6 == (Just NonExistant) then "+" else "\\/") --check if grandchild 4 has children (6 and 7)
         putStrLn ""
 
         ------- GRANDCHILDREN 
-
+        --  -------         --------
+        -- |      |        |       |
         -- 4      5        6       7
+        putStr $ replicate 8 ' '
+        putStr $ unwords (map (\x -> "|" ++ replicate 12 ' ') (take 4 l3)) ++ "\n"
         putStr $ replicate 6 ' '
         putStr $ unwords (map (\x -> printItem x ++ replicate 8 ' ') (take 4 l3)) ++ "\n"
 
@@ -424,4 +439,4 @@ main = do
     
     let cs = [[(Just Baby)], [Nothing, Nothing]]
 
-    prettyPrintHelper lists cs (Just Rock) 2
+    prettyPrintHelper lists cs (Just Rock) 1
