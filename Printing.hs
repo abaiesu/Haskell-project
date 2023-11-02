@@ -79,7 +79,7 @@ printItem (Just Rock) = "Rock"
 printItem (Just Spider) = "Spider"
 printItem (Just Baby) = "Baby"
 printItem (Just NonExistant) = " "
-printItem Nothing = "Empty"
+printItem Nothing = "  O  "
 
 
 {-
@@ -130,10 +130,10 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
         -- |      |        |       |
         -- --------        ---------
         putStr $ replicate 6 ' '
-        putStr $ if l3 !!  0 == (Just NonExistant) then "     " else "  -------" --first half of first line
-        putStr $ if l3 !!  1 == (Just NonExistant) then "     " else "--------" ++ replicate 13 ' ' --second half of first line
-        putStr $ if l3 !!  2 == (Just NonExistant) then "     " else "-------" --first half of second line
-        putStr $ if l3 !!  3 == (Just NonExistant) then "     " else "--------" --second half of second line
+        putStr $ if l3 !!  0 == (Just NonExistant) then "     " else "  +------" --first half of first line
+        putStr $ if l3 !!  1 == (Just NonExistant) then "     " else "-------+" ++ replicate 13 ' ' --second half of first line
+        putStr $ if l3 !!  2 == (Just NonExistant) then "     " else "+------" --first half of second line
+        putStr $ if l3 !!  3 == (Just NonExistant) then "     " else "-------+" --second half of second line
         putStrLn ""
 
         -- 4      5        6       7
@@ -182,8 +182,8 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
         --     -----------------
         putStr $ replicate 6 ' '
         putStr $ replicate 9 ' '
-        putStr $ if l2 !!  0 == (Just NonExistant) then "               " else "--------------" --first half
-        putStr $ if l2 !!  1 == (Just NonExistant) then "               " else "-------------"  --second half
+        putStr $ if l2 !!  0 == (Just NonExistant) then "               " else "+-------------" --first half
+        putStr $ if l2 !!  1 == (Just NonExistant) then "               " else "------------+"  --second half
         putStrLn ""
         
         if dir == 0 then do
@@ -234,7 +234,7 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             putStr ("|" ++ replicate 26 ' ' ++ "|")
             putStrLn ""
             putStr $ replicate 6 ' '
-            putStr $ replicate 23 ' ' ++ "----------------------------"
+            putStr $ replicate 23 ' ' ++ "+--------------------------+"
             putStrLn ""
 
 
@@ -252,7 +252,8 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             putStr $ replicate 6 ' '
             putStr $ replicate 36 ' ' ++ ['|']
             putStrLn ""
-            putStr $ replicate 34 ' ' ++ "Empty"
+            putStr $ replicate 40 ' ' 
+            putStr $ printItem parent_item
             putStrLn ""
 
         else if dir == 1 then do
@@ -303,21 +304,22 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             setSGR [Reset] 
             putStr ("|" ++ replicate 26 ' ')
             putStrLn ""
-            putStr $ replicate 4 ' ' ++ "-------------------------"
+            putStr $ replicate 4 ' ' ++ "+-----------------------+"
             putStrLn ""
 
 
-            -- 4      5        6       7
-            -- |      |        |       |
-            -- --------        ---------
-            --     |               |
-            --     2               3
-            --     -----------------
-            --             |                  \/
-            --             1                   9
-            --             ---------------------
-            --                        |
-            --                      Empty
+              --      4      5        6       7
+            --      |      |        |       |
+            --      --------        ---------
+            --          |               |
+            --          2               3
+            --          -----------------
+            -- \/               |    
+            --  9               1     
+            --  |               |
+            --  -----------------     
+            --          |
+            --          item
             putStr $ replicate 6 ' '
             putStr $ replicate 10 ' ' ++ "|"
             putStrLn ""
@@ -384,4 +386,4 @@ main = do
     
     let cs = [[(Just Baby)], [Nothing, Nothing]]
 
-    prettyPrintHelper lists cs (Just Rock) 2
+    prettyPrintHelper lists cs (Just Rock) 1
