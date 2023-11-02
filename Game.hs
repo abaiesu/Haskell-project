@@ -75,7 +75,6 @@ repl= do
     go :: GameState -> IO ()
     go gameState = do
         let z = binZip gameState
-        putStrLn (prettyPrintBin 3 (snd z))
         case z of
             (_, Leaf Nothing) -> putStrLn "You see an empty leaf."
             (_, Leaf (Just item)) -> putStrLn $ "You see a leaf with a " ++ show item
