@@ -2,9 +2,7 @@
 {-# OPTIONS_GHC -Wno-overlapping-patterns #-}
 {-# HLINT ignore "Use camelCase" #-}
 module Bin where
-import System.IO ()
 import System.Random ( randomIO, randomRIO )
-
 
 data Thing = Rock | Crow | NonExistant
     deriving (Show, Eq)
@@ -14,7 +12,7 @@ type Item = (Bool, Maybe Thing)
 data Bin a = Leaf a | Node a (Bin a) (Bin a)
     deriving (Show, Eq)
 
-data BinCxt a = Hole | B0 (BinCxt a) (Bin a) | B1 (Bin a) (BinCxt a)
+data BinCxt a = Hole | B0 a (BinCxt a) (Bin a) | B1 a (Bin a) (BinCxt a)
     deriving (Show, Eq)
 
 type BinZip a = (BinCxt a, Bin a)
@@ -36,16 +34,18 @@ printLabels (Node (_, Just thing) left right) = do
     printLabels right
 
 
-
+-- checks for a thing in a node
 check_action :: Thing -> Bin Item -> Bool
 check_action item (Leaf (_, Just i)) = item == i
 check_action item (Node (_, Just i) _ _) = item == i
 check_action _ _ = False
 
+-- empties the node
 emptyNode :: Bin Item -> Bin Item
 emptyNode (Leaf (b, _)) = Leaf (b, Nothing)
 emptyNode (Node (b,_) left right) = Node (b, Nothing) left right
 
+-- collects from a node
 do_collect :: Bin Item -> IO (Maybe (Bin Item))
 do_collect node = if check_action Rock node
 then do
@@ -55,7 +55,7 @@ else do
     putStrLn "Nothing to collect"
     return Nothing
 
-
+-- shoots a spider
 do_shoot :: Bin Item -> IO (Maybe (Bin Item))
 do_shoot node = if check_action Crow node
 then do
@@ -65,9 +65,21 @@ else do
     putStrLn "Nothing to kill"
     return Nothing
 
-go_back :: BinZip Item -> BinZip Item
-go_back = undefined
+-- gives the zipper after going 1 back
+-- arguement is the Binzip
+go_backer :: BinZip Item -> BinZip Item
+go_backer (hole, t) = (hole, t)
+go_backer (b, t) = case pathFather b of
+  hole -> (hole, t)
+  (B0 a b1 b2) -> (b1, Node a b2 t)
+  (B1 a b1 b2) -> (b2, Node a t b1)
 
+-- father of the current node
+-- arguements are the context 
+pathFather :: BinCxt Item -> BinCxt Item
+pathFather hole = hole
+pathFather (B0 a b1 b2) = b1
+pathFather (B1 a b1 b2) = b2
 
 
 -- generate a random Item (Rock, Baby, Spider, or Nothing) 
@@ -78,7 +90,7 @@ randomItem = do
     if even randomNumber -- first choose between Nothing or Just an item
         then return (False, Nothing)
         else do -- then choose among the 3 possible items
-            let n = randomNumber `mod` 3
+            let n = randomNumber `mod` 2
             case n of
                 0 -> return (False, Just Rock)
                 1 -> return (False, Just Crow)
@@ -109,6 +121,44 @@ generateTree depth = do
     BothSubtrees -> generateTree (depth - 1)
     _ -> return (Leaf item)
   return (Node item leftSubtree rightSubtree)
+
+-- switches the bool i.e. if there are no crops then grows them or if there are then destroys them
+-- arguements are the tree
+switchBool :: Bin Item -> IO (Bin Item)
+switchBool (Leaf (b, item)) = return (Leaf (not b, item))
+switchBool (Node (b, item) left right) = return (Node (not b, item) left right)
+
+--generates crops randomly in a BinaryTree
+-- arguements are the tree and the probaility
+generateCrops :: Bin Item -> Float -> IO (Bin Item)
+generateCrops (Leaf item) _ = return (Leaf item)
+generateCrops (Node item left right) p = do
+    shouldSwitch <- randomIO :: IO Float
+    if shouldSwitch <= p
+        then do
+            newleft <- generateCrops left p
+            newLeft2 <- switchBool newleft
+            newRight <- generateCrops right p
+            newRight2 <- switchBool newRight
+            return (Node item newLeft2 newRight2)
+        else do
+            newLeft <- generateCrops left p
+            newRight <- generateCrops right p
+            return (Node item newLeft newRight)
+
+-- generates crops randomly in a context and tree
+-- arguements are the context and the probaility
+genCropCxt :: BinCxt Item -> Float -> IO (BinCxt Item)
+genCropCxt Hole _= return Hole
+genCropCxt (B0 a cxt bin) p = do
+    newBin <- generateCrops bin p
+    newCxt <- genCropCxt cxt p
+    return (B0 a newCxt newBin)
+genCropCxt (B1 a bin cxt) p= do
+    newBin <- generateCrops bin p
+    newCxt <- genCropCxt cxt p
+    return (B1 a newBin newCxt)
+
 
 -- get the number of nodes with Nothing
 countNothingNodes :: Bin Item -> Int
@@ -158,7 +208,5 @@ populateEmptyNodes tree p = do
       newRight <- go right n
       return (Node item newLeft newRight)
 
-switchBool :: Bin Item -> IO (Bin Item)
-switchBool (Leaf (b, item)) = return (Leaf (not b, item))
-switchBool (Node (b, item) left right) = return (Node (not b, item) left right)
+
 

@@ -76,7 +76,9 @@ repl= do
   where
     go :: GameState -> IO ()
     go gameState = do
-        let z = binZip gameState
+        let (cxt, t) = binZip gameState
+        q <- genCropCxt cxt 0.01
+        let z = (q,t)
         --putStrLn (prettyPrintBin 3 (snd z))
         case z of
             (_, Leaf (_, Nothing)) -> putStrLn "You see an empty leaf."
@@ -93,18 +95,10 @@ repl= do
                 putStrLn "I'm sorry, I do not understand."
                 go gameState
 
-            Just Place_Flag -> do
-                putStrLn "Not implemented"
-                go gameState
-
-            Just Go_Flag -> do
-                putStrLn "Not implemented"
-                go gameState
-
             Just Go_Left ->
                 case z of
-                    (c, Node _ t1 t2) -> do
-                        let newGameState = gameState { binZip = (B0 c t2, t1) }
+                    (c, Node a t1 t2) -> do
+                        let newGameState = gameState { binZip = (B0 a c t2, t1) }
                         go newGameState
                     (c, Leaf _) -> do
                         putStrLn "You cannot climb any further."
@@ -117,9 +111,9 @@ repl= do
 
             Just Go_Right ->
                 case z of
-                    (c, Node item t1 t2) ->
+                    (c, Node a t1 t2) ->
                         do
-                        let newGameState = gameState { binZip = (B1 t1 c, t2)}
+                        let newGameState = gameState { binZip = (B1 a t1 c, t2)}
                         go newGameState
                     (c, Leaf _) -> do
                         putStrLn "You cannot climb any further."
@@ -127,16 +121,13 @@ repl= do
 
             Just Go_Back ->
                 case z of
-                    (B0 c t2, t) -> do
-                        let newGameState = gameState { binZip = (c, Node (False, Nothing) t t2) }
-                        go newGameState  --we put nothing as the item because if there was something it's already taken
-                    (B1 t1 c, t) -> do
-                        let newGameState = gameState { binZip = (c, Node (False, Nothing) t1 t)}
-                        go newGameState
                     (Hole, _) -> do
                         putStrLn "You are already at the root."
                         putStrLn "You cannot go back any further."
                         go gameState
+                    b -> do
+                        let newGameState = gameState { binZip = go_backer b }
+                        go newGameState
 
 
 
@@ -176,5 +167,6 @@ repl= do
 
 
 
+main :: IO ()
 main = repl
 
