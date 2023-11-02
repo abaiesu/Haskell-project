@@ -1,9 +1,9 @@
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Use camelCase" #-}
+module Bin where
 import System.IO
 import System.Random
 
-module Bin where
 
 data Item = Rock | Spider | Baby | NonExistant
     deriving (Show, Eq)
