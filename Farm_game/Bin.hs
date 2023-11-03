@@ -208,7 +208,8 @@ populateEmptyNodes tree p = do
       newRight <- go right n
       return (Node item newLeft newRight)
 
--- crow eating 
+-- whether a crow eats or not
+-- input is a single node of a binary tree (Or a tree but it wont go any further than the root)
 updateCrowNode :: Bin Item -> IO Bool
 updateCrowNode (Leaf (True, Just Crow)) = do
     shouldUpdate <- randomRIO (0 :: Int, 2) -- 1/3 probability
@@ -219,7 +220,8 @@ updateCrowNode (Node (True, Just Crow) left right) = do
 updateCrowNode _ = return False
 
 
--- Function goes through the whole tree to check if crow will eat ot nors
+-- Function goes through the whole tree to check if crow will eat or not
+-- input is a binary tree and output is that but updated
 updateCrowEat :: Bin Item -> IO (Bin Item)
 updateCrowEat (Node a b1 b2) = do
     isCrowNode1 <- updateCrowNode b1
@@ -236,3 +238,9 @@ updateCrowEat (Node a b1 b2) = do
             updatedB2 <- updateCrowEat b2
             return $ Node a updatedB1 updatedB2
 updateCrowEat (Leaf a) = return (Leaf a)
+
+--plugger
+plug :: BinZip Item -> Bin Item
+plug (Hole,t) = t
+plug (B0 a c t2,t) = plug (c,Node a t t2)
+plug (B1 a t1 c ,t) = plug (c,Node a t1 t)
