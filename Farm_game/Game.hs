@@ -13,7 +13,6 @@ import Control.Concurrent (threadDelay)
 data GameState = GameState {
     binZip :: BinZip Item,
     rocksCollected :: Int,
-    spidersKilled :: Int,
     points :: Int
 }
 
@@ -69,7 +68,6 @@ repl= do
     let game = GameState {
       binZip = (Hole, tree),
       rocksCollected = 0,
-      spidersKilled = 0,
       points = 0
     }
     go game
@@ -150,7 +148,7 @@ repl= do
                 result <- do_shoot (snd z)
                 case result of
                     Just newTree -> do
-                                let newGameState = gameState { binZip = (fst z, newTree), rocksCollected = rocksCollected gameState-1, spidersKilled = spidersKilled gameState +1 }
+                                let newGameState = gameState { binZip = (fst z, newTree), rocksCollected = rocksCollected gameState-1, points = points gameState+1}
                                 go newGameState
                     Nothing -> go gameState
 
