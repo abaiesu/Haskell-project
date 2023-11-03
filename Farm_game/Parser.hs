@@ -73,9 +73,6 @@ parseCmd :: Parser String Cmd
 parseCmd = parseClimb <|> parseAction <|> parseQuit
 
 -- Parse a climbing or going command.
--- Parse a climbing or going command.
--- Parse a climbing or going command.
--- Parse a climbing or going command.
 parseClimb :: Parser String Cmd
 parseClimb = do
     token1 <- match "go" <|> return "go"

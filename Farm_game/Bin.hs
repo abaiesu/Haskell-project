@@ -222,25 +222,28 @@ updateCrowNode _ = return False
 
 -- Function goes through the whole tree to check if crow will eat or not
 -- input is a binary tree and output is that but updated
-updateCrowEat :: Bin Item -> IO (Bin Item)
-updateCrowEat (Node a b1 b2) = do
+updateCrowEat :: Bin Item -> Int -> IO (Bin Item, Int)
+updateCrowEat (Node a b1 b2) counter = do
     isCrowNode1 <- updateCrowNode b1
     isCrowNode2 <- updateCrowNode b2
+    let counter' = if isCrowNode1 || isCrowNode2 then counter + 1 else counter
     if isCrowNode1 || isCrowNode2
         then do
-            updatedB1 <- updateCrowEat b1
-            updatedB2 <- updateCrowEat b2
+            (updatedB1, updatedCounter1) <- updateCrowEat b1 counter'
+            (updatedB2, updatedCounter2) <- updateCrowEat b2 updatedCounter1
             newB1 <- switchBool updatedB1
             newB2 <- switchBool updatedB2
-            return $ Node a newB1 newB2
+            return (Node a newB1 newB2, updatedCounter2)
         else do
-            updatedB1 <- updateCrowEat b1
-            updatedB2 <- updateCrowEat b2
-            return $ Node a updatedB1 updatedB2
-updateCrowEat (Leaf a) = return (Leaf a)
+            (updatedB1, updatedCounter1) <- updateCrowEat b1 counter'
+            (updatedB2, updatedCounter2) <- updateCrowEat b2 updatedCounter1
+            return (Node a updatedB1 updatedB2, updatedCounter2)
+updateCrowEat (Leaf a) counter = return (Leaf a, counter)
+
 
 --plugger
 plug :: BinZip Item -> Bin Item
 plug (Hole,t) = t
 plug (B0 a c t2,t) = plug (c,Node a t t2)
 plug (B1 a t1 c ,t) = plug (c,Node a t1 t)
+
