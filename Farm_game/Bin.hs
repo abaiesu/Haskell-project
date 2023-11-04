@@ -82,8 +82,8 @@ pathFather (B0 a b1 b2) = b1
 pathFather (B1 a b1 b2) = b2
 
 
--- generate a random Item (Rock, Baby, Spider, or Nothing) 
--- 1/2 proba of Nothing, 1/6 proba for Rock, 1/6 proba for Baby, 1/6 for Spider
+-- generate a random Item (Rock, Crow or Nothing) 
+-- 1/2 proba of Nothing, 1/6 proba for Rock, 1/6 proba for Crow 1/6 for Spider
 randomItem :: IO Item
 randomItem = do
     randomNumber <- randomIO :: IO Int
@@ -247,3 +247,37 @@ plug (Hole,t) = t
 plug (B0 a c t2,t) = plug (c,Node a t t2)
 plug (B1 a t1 c ,t) = plug (c,Node a t1 t)
 
+maintest :: IO ()
+maintest = do
+    -- Generate a random binary tree
+    tree <- generateTree 5
+    putStrLn "Random Binary Tree:"
+    printLabels tree
+
+    -- Populate empty nodes with a probability of 0.5
+    populatedTree <- populateEmptyNodes tree 5
+    putStrLn "Populated Binary Tree:"
+    printLabels populatedTree
+
+    -- Update Crow eating and count how many times it ate
+    (updatedTree, crowEats) <- updateCrowEat populatedTree 0
+    putStrLn "Updated Binary Tree after Crow eating:"
+    printLabels updatedTree
+    putStrLn $ "Crow ate " ++ show crowEats ++ " times."
+
+    -- Generate a random binary tree with crops
+    treeWithCrops <- generateCrops tree 0.3
+    putStrLn "Binary Tree with Crops:"
+    printLabels treeWithCrops
+
+    -- Switch the boolean values in the tree
+    switchedTree <- switchBool tree
+    putStrLn "Binary Tree with Switched Boolean Values:"
+    printLabels switchedTree
+
+    -- Testing the zipper functions
+    let binZip = (Hole, tree)
+    let binZip2 = go_back binZip
+    putStrLn "BinZip before and after go_back:"
+    printLabels (plug binZip)
+    printLabels (plug binZip2)
