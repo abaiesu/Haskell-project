@@ -102,10 +102,6 @@ repl= do
                         putStrLn "You cannot climb any further."
                         go gameState
 
-            --
-            --Node (Nothing) (Leaf (Just Rock)) (Node (Just Spider) (Leaf (Nothing)) (Leaf (Just Baby)))
-            --
-
 
             Just Go_Right ->
                 case z of

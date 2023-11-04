@@ -22,14 +22,14 @@ data SubtreeOption = LeftSubtree | RightSubtree | BothSubtrees
 
 -- debugger function : prints all the items found in a tree
 printLabels :: Bin Item -> IO ()
-printLabels (Leaf (_, Nothing)) = putStrLn "Empty Leaf"
-printLabels (Leaf (_, Just thing)) = putStrLn $ "Leaf: " ++ show thing
-printLabels (Node (_ ,Nothing) left right) = do
-    putStrLn "Node: (No Label)"
+printLabels (Leaf (b, Nothing)) = putStrLn $ "Leaf: Noth " ++ show b
+printLabels (Leaf (b, Just thing)) = putStrLn $ "Leaf: " ++ show thing ++ " " ++ show b
+printLabels (Node (b ,Nothing) left right) = do
+    putStrLn $ "Node: Noth"++ " " ++ show b
     printLabels left
     printLabels right
-printLabels (Node (_, Just thing) left right) = do
-    putStrLn $ "Node: " ++ show thing
+printLabels (Node (b, Just thing) left right) = do
+    putStrLn $ "Node: " ++ show thing ++ " " ++ show b
     printLabels left
     printLabels right
 
@@ -82,18 +82,16 @@ pathFather (B0 a b1 b2) = b1
 pathFather (B1 a b1 b2) = b2
 
 
--- generate a random Item (Rock, Baby, Spider, or Nothing) 
--- 1/2 proba of Nothing, 1/6 proba for Rock, 1/6 proba for Baby, 1/6 for Spider
+-- generate a random Item (Rock, Crow or Nothing) 
+-- 1/2 proba of Nothing, 1/6 proba for Rock, 1/6 proba for Crow 1/6 for Spider
 randomItem :: IO Item
 randomItem = do
     randomNumber <- randomIO :: IO Int
-    if even randomNumber -- first choose between Nothing or Just an item
+    if even randomNumber
         then return (False, Nothing)
-        else do -- then choose among the 3 possible items
-            let n = randomNumber `mod` 2
-            case n of
-                0 -> return (False, Just Rock)
-                1 -> return (False, Just Crow)
+        else if (randomNumber `mod` 4) == 1
+            then return (False, Just Rock)
+            else return (False, Just Crow)
 
 
 -- generated a random subtree option with equal proba each
@@ -210,35 +208,35 @@ populateEmptyNodes tree p = do
 
 -- whether a crow eats or not
 -- input is a single node of a binary tree (Or a tree but it wont go any further than the root)
-updateCrowNode :: Bin Item -> IO Bool
-updateCrowNode (Leaf (True, Just Crow)) = do
-    shouldUpdate <- randomRIO (0 :: Int, 2) -- 1/3 probability
+updateCrowNode :: Bin Item -> Int -> IO Bool
+updateCrowNode (Leaf (True, Just Crow)) p= do
+    shouldUpdate <- randomRIO (0 :: Int, p) -- 1/3 probability
     return (shouldUpdate == 0)  -- Return True or False based on the random value
-updateCrowNode (Node (True, Just Crow) left right) = do
-    shouldUpdate <- randomRIO (0 :: Int, 2) -- 1/3 probability
+updateCrowNode (Node (True, Just Crow) _ _) p = do
+    shouldUpdate <- randomRIO (0 :: Int, p) -- 1/3 probability
     return (shouldUpdate == 0)  -- Return True or False based on the random value
-updateCrowNode _ = return False
+updateCrowNode _ _ = do
+    return False
 
 
 -- Function goes through the whole tree to check if crow will eat or not
--- input is a binary tree and output is that but updated
-updateCrowEat :: Bin Item -> Int -> IO (Bin Item, Int)
-updateCrowEat (Node a b1 b2) counter = do
-    isCrowNode1 <- updateCrowNode b1
-    isCrowNode2 <- updateCrowNode b2
-    let counter' = if isCrowNode1 || isCrowNode2 then counter + 1 else counter
+-- input is a binary tree and a null counter and the probability  output is that but updated
+updateCrowEat :: Bin Item -> Int -> Int -> IO (Bin Item, Int)
+updateCrowEat (Node a b1 b2) counter p = do
+    isCrowNode1 <- updateCrowNode b1 p
+    isCrowNode2 <- updateCrowNode b2 p
     if isCrowNode1 || isCrowNode2
         then do
-            (updatedB1, updatedCounter1) <- updateCrowEat b1 counter'
-            (updatedB2, updatedCounter2) <- updateCrowEat b2 updatedCounter1
+            (updatedB1, updatedCounter1) <- updateCrowEat b1 (counter+1) p
+            (updatedB2, updatedCounter2) <- updateCrowEat b2 updatedCounter1 p
             newB1 <- switchBool updatedB1
             newB2 <- switchBool updatedB2
             return (Node a newB1 newB2, updatedCounter2)
         else do
-            (updatedB1, updatedCounter1) <- updateCrowEat b1 counter'
-            (updatedB2, updatedCounter2) <- updateCrowEat b2 updatedCounter1
+            (updatedB1, updatedCounter1) <- updateCrowEat b1 counter p
+            (updatedB2, updatedCounter2) <- updateCrowEat b2 updatedCounter1 p
             return (Node a updatedB1 updatedB2, updatedCounter2)
-updateCrowEat (Leaf a) counter = return (Leaf a, counter)
+updateCrowEat (Leaf a) counter _= return (Leaf a, counter)
 
 
 --plugger
