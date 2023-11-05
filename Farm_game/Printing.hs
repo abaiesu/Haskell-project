@@ -10,7 +10,7 @@ ARG1 : tree
 ARG2 : depth at which to trim
 -}
 trimTree :: Bin a -> Int -> Bin a
-trimTree (Leaf x) _ = Leaf x 
+trimTree (Leaf x) _ = Leaf x
 trimTree (Node x left right) depth
     | depth == 0 = Leaf x
     | otherwise   = Node x (trimTree left (depth - 1)) (trimTree right (depth - 1))
@@ -28,22 +28,22 @@ maxDepth (Node _ left right) = 1 + max (maxDepth left) (maxDepth right)
 -- Fills in the given tree to get a depth n 
 fill :: Bin Item -> Int -> Bin Item
 fill tree 0 = tree
-fill (Leaf item) n = (Node item (fill (Leaf (Just NonExistant)) (n-1)) (fill (Leaf (Just NonExistant)) (n-1)))
-fill (Node item left right) n = (Node item (balanceTree left) (balanceTree right))
+fill (Leaf item) n = Node item (fill (Leaf (False, Just NonExistant)) (n-1)) (fill (Leaf (False, Just NonExistant)) (n-1))
+fill (Node item left right) n = Node item (balanceTree left) (balanceTree right)
 
 -- Takes in a non-balanced tree and returns a balanced version with non-existant nodes
 balanceTree :: Bin Item -> Bin Item
-balanceTree (Leaf item) = (Leaf item)
-balanceTree (Node item left right) = (Node item (fill left n) (fill right m)) 
+balanceTree (Leaf item) = Leaf item
+balanceTree (Node item left right) = Node item (fill left n) (fill right m)
   where
-    n = (maxDepth (Node item left right)) - (maxDepth left) - 1
-    m = (maxDepth (Node item left right)) - (maxDepth right) - 1
+    n = maxDepth (Node item left right) - maxDepth left - 1
+    m = maxDepth (Node item left right) - maxDepth right - 1
 
 
 
 -- Checks if a binary tree is balanced
 isBalanced :: Bin Item -> Bool
-isBalanced (Leaf _) = True 
+isBalanced (Leaf _) = True
 isBalanced (Node _ left right) =
   let leftHeight = maxDepth left
       rightHeight = maxDepth right
@@ -53,10 +53,10 @@ isBalanced (Node _ left right) =
 
 
 -- From a binary tree returns a list if lists where each inner list has the nodes present at a given level
-levelLabels :: Bin a -> [[Maybe a]]
+levelLabels :: Bin Item -> [[Item]]
 levelLabels tree = levelLabelsHelper [tree]
   where
-    levelLabelsHelper :: [Bin a] -> [[Maybe a]]
+    levelLabelsHelper :: [Bin Item] -> [[Item]]
     levelLabelsHelper [] = []
     levelLabelsHelper nodes =
       let labels = concatMap getNodeLabel nodes
@@ -74,10 +74,9 @@ levelLabels tree = levelLabelsHelper [tree]
 
 
 --Prints items
-printItem :: Maybe Item -> String
+printItem :: Maybe Thing -> String
 printItem (Just Rock) = "Rock"
-printItem (Just Spider) = "Spider"
-printItem (Just Baby) = "Baby"
+printItem (Just Crow) = "Crow"
 printItem (Just NonExistant) = " "
 printItem Nothing = "  O  "
 
@@ -95,7 +94,7 @@ usage : ARG1 : list of the nodes at each level [[root], [children], [grandchildr
                1 = we took the right path (and have a left sibling)
                2 = we are at the root and have no sibling
 -}
-prettyPrintHelper :: [[Maybe Item]] -> [[Maybe Item]] -> Maybe Item -> Int -> IO ()
+prettyPrintHelper :: [[Maybe Thing]] -> [[Maybe Thing]] -> Maybe Thing -> Int -> IO ()
 prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
 
     let expectedLengths_l = [1, 2, 4, 8]
@@ -106,24 +105,24 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
 
     if expectedLengths_l /= actualLengths_l && expectedLengths_c /= actualLengths_c
     then putStrLn "Error: The provided list isn't a valid tree"
-    else do 
+    else do
 
         putStr $ replicate 6 ' '
         putStr " "
-        putStr (if l4 !! 0 == (Just NonExistant) then "+" else "\\/") --check if grandchild 1 has children (0 and 1)
+        putStr (if head l4 == Just NonExistant then "+" else "\\/") --check if grandchild 1 has children (0 and 1)
         setSGR [SetColor Foreground Dull Blue] --put the field separtion
         putStr "-------------"
         setSGR [Reset]
 
-        putStr (if l4 !! 2 == (Just NonExistant) then "+" else "\\/") --check if grandchild 2 has children (2 and 3)
+        putStr (if l4 !! 2 == Just NonExistant then "+" else "\\/") --check if grandchild 2 has children (2 and 3)
         putStr $ replicate 13 ' '
 
-        putStr (if l4 !! 4 == (Just NonExistant) then "+" else "\\/") --check if grandchild 3 has children (4 and 5)
+        putStr (if l4 !! 4 == Just NonExistant then "+" else "\\/") --check if grandchild 3 has children (4 and 5)
         setSGR [SetColor Foreground Dull Blue] --put the field separtion
         putStr "-------------"
         setSGR [Reset]
 
-        putStr (if l4 !! 6 == (Just NonExistant) then "+" else "\\/") --check if grandchild 4 has children (6 and 7)
+        putStr (if l4 !! 6 == Just NonExistant then "+" else "\\/") --check if grandchild 4 has children (6 and 7)
         putStrLn ""
 
         ------- GRANDCHILDREN 
@@ -131,27 +130,27 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
         -- |      |        |       |
         -- 4      5        6       7
         putStr $ replicate 8 ' '
-        putStr $ unwords (map (\x -> "|" ++ replicate 12 ' ') (take 4 l3)) ++ "\n"
+        putStrLn (unwords (map (\x -> "|" ++ replicate 12 ' ') (take 4 l3)))
         putStr $ replicate 6 ' '
-        putStr $ unwords (map (\x -> printItem x ++ replicate 8 ' ') (take 4 l3)) ++ "\n"
+        putStrLn (unwords (map (\x -> printItem x ++ replicate 8 ' ') (take 4 l3)))
 
         -- 4      5        6       7
         -- |      |        |       |
         putStr $ replicate 6 ' '
         putStr "  "
-        putStr $ unwords [if x == (Just NonExistant) then " " else "|" ++ replicate 12 ' ' | x <- l3] ++ "\n"
-        
+        putStrLn (unwords [if x == Just NonExistant then " " else "|" ++ replicate 12 ' ' | x <- l3])
+
         -- 4      5        6       7
         -- |      |        |       |
         -- --------        ---------
         putStr $ replicate 6 ' '
-        putStr $ if l3 !!  0 == (Just NonExistant) then "     " else "  +------" --first half of first line
-        putStr $ if l3 !!  1 == (Just NonExistant) then "     " else "-------+" --second half of first line
-        setSGR [SetColor Foreground Dull Blue] 
+        putStr $ if head l3 == Just NonExistant then "     " else "  +------" --first half of first line
+        putStr $ if l3 !!  1 == Just NonExistant then "     " else "-------+" --second half of first line
+        setSGR [SetColor Foreground Dull Blue]
         putStr "-------------"
         setSGR [Reset]
-        putStr $ if l3 !!  2 == (Just NonExistant) then "     " else "+------" --first half of second line
-        putStr $ if l3 !!  3 == (Just NonExistant) then "     " else "-------+" --second half of second line
+        putStr $ if l3 !!  2 == Just NonExistant then "     " else "+------" --first half of second line
+        putStr $ if l3 !!  3 == Just NonExistant then "     " else "-------+" --second half of second line
         putStrLn ""
 
         -- 4      5        6       7
@@ -160,9 +159,9 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
         --     |               |
         putStr $ replicate 6 ' '
         putStr $ replicate 9 ' '
-        if l3 !! 0 ==  (Just NonExistant) then putStr " " else putStr "|"
+        if head l3 ==  Just NonExistant then putStr " " else putStr "|"
         putStr $ replicate 25 ' '
-        if l3 !! 2 ==  (Just NonExistant) then putStr " " else putStr "|"
+        if l3 !! 2 ==  Just NonExistant then putStr " " else putStr "|"
         putStrLn ""
 
 
@@ -174,7 +173,7 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
         --     |               |
         --     2               3
         putStr $ replicate 6 ' '
-        putStr $ replicate 6 ' ' ++ printItem (l2 !! 0) ++ replicate 23 ' ' --space first item space
+        putStr $ replicate 6 ' ' ++ printItem (head l2) ++ replicate 23 ' ' --space first item space
         putStr $ printItem (l2 !! 1)  --second item
         putStrLn ""
 
@@ -186,9 +185,9 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
         --     |               |
         putStr $ replicate 6 ' '
         putStr $ replicate 9 ' '
-        putStr $ if l2 !!  0 == (Just NonExistant) then " " else "|"
+        putStr $ if head l2 == Just NonExistant then " " else "|"
         putStr $ replicate 25 ' '
-        putStr $ if l2 !! 1 == (Just NonExistant) then " " else "|" 
+        putStr $ if l2 !! 1 == Just NonExistant then " " else "|"
         putStrLn ""
 
         if dir == 0 then do
@@ -201,14 +200,14 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             --     -----------------          \/
             putStr $ replicate 6 ' '
             putStr $ replicate 9 ' '
-            putStr $ if l2 !!  0 == (Just NonExistant) then "               " else "+-------------" --first half
-            putStr $ if l2 !!  1 == (Just NonExistant) then "               " else "------------+"  --second half
-            setSGR [SetColor Foreground Dull Blue] 
-            putStr $ if c2 !!  1 == (Just NonExistant) then " " else "-------------"
-            setSGR [Reset] 
-            putStr $ if c2 !!  1 == (Just NonExistant) then " " else "\\/"
+            putStr $ if head l2 == Just NonExistant then "               " else "+-------------" --first half
+            putStr $ if l2 !!  1 == Just NonExistant then "               " else "------------+"  --second half
+            setSGR [SetColor Foreground Dull Blue]
+            putStr $ if c2 !!  1 == Just NonExistant then " " else "-------------"
+            setSGR [Reset]
+            putStr $ if c2 !!  1 == Just NonExistant then " " else "\\/"
             putStrLn ""
-            
+
             -- 4      5        6       7
             -- |      |        |       |
             -- --------        ---------
@@ -217,9 +216,9 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             --     -----------------             \/
             --             |                      |
             putStr $ replicate 6 ' '
-            putStr $ replicate 23 ' ' ++ ['|'] 
-            putStr $ replicate 26 ' ' 
-            putStr $ if c2 !!  1 == (Just NonExistant) then " " else "|"
+            putStr $ replicate 23 ' ' ++ ['|']
+            putStr $ replicate 26 ' '
+            putStr $ if c2 !!  1 == Just NonExistant then " " else "|"
             putStrLn ""
 
             --------- ROOT 
@@ -233,8 +232,8 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             --             |                  \/
             --             1                   9
             putStr $ replicate 6 ' '
-            putStr $ replicate 22 ' ' ++printItem (l1 !! 0) 
-            putStr $ replicate 22 ' ' ++ printItem (c1 !! 0) 
+            putStr $ replicate 22 ' ' ++printItem (head l1)
+            putStr $ replicate 22 ' ' ++ printItem (head c1)
             putStrLn ""
 
 
@@ -249,10 +248,10 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             --             |                   |
             --             ---------------------
             putStr $ replicate 6 ' '
-            putStr $ replicate 19 ' ' 
+            putStr $ replicate 19 ' '
             setSGR [SetColor Foreground Vivid Red]
-            putStr "YOU " 
-            setSGR [Reset] 
+            putStr "YOU "
+            setSGR [Reset]
             putStr ("|" ++ replicate 26 ' ' ++ "|")
             putStrLn ""
             putStr $ replicate 6 ' '
@@ -274,7 +273,7 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             putStr $ replicate 6 ' '
             putStr $ replicate 36 ' ' ++ ['|']
             putStrLn ""
-            putStr $ replicate 40 ' ' 
+            putStr $ replicate 40 ' '
             putStr $ printItem parent_item
             putStrLn ""
 
@@ -288,14 +287,14 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             --     |               |
             -- \/  -----------------         
             putStr $ replicate 3 ' '
-            putStr $ if c2 !!  1 == (Just NonExistant) then " " else "\\/"
-            setSGR [SetColor Foreground Dull Blue] 
-            putStr $ if c2 !!  1 == (Just NonExistant) then " " else "----------"
-            setSGR [Reset] 
-            putStr $ if l2 !!  0 == (Just NonExistant) then "               " else "+-------------" --first half
-            putStr $ if l2 !!  1 == (Just NonExistant) then "               " else "------------+"  --second half
+            putStr $ if c2 !!  1 == Just NonExistant then " " else "\\/"
+            setSGR [SetColor Foreground Dull Blue]
+            putStr $ if c2 !!  1 == Just NonExistant then " " else "----------"
+            setSGR [Reset]
+            putStr $ if head l2 == Just NonExistant then "               " else "+-------------" --first half
+            putStr $ if l2 !!  1 == Just NonExistant then "               " else "------------+"  --second half
             putStrLn ""
-            
+
             --      4      5        6       7
             --      |      |        |       |
             --      --------        ---------
@@ -304,8 +303,8 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             -- \/       -----------------
             -- |                |                     
             putStr $ replicate 4 ' '
-            putStr $ if c2 !!  1 == (Just NonExistant) then " " else "|"
-            putStr $ replicate 23 ' ' ++ ['|'] 
+            putStr $ if c2 !!  1 == Just NonExistant then " " else "|"
+            putStr $ replicate 23 ' ' ++ ['|']
             putStrLn ""
 
             --------- ROOT 
@@ -319,12 +318,12 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             -- \/               |    
             --  9               1               
             putStr $ replicate 2 ' '
-            putStr $ printItem (c1 !! 0) 
-            putStr $ replicate 20 ' ' ++printItem (l1 !! 0) 
+            putStr $ printItem (head c1)
+            putStr $ replicate 20 ' ' ++printItem (head l1)
             putStrLn ""
 
 
-            
+
             --      4      5        6       7
             --      |      |        |       |
             --      --------        ---------
@@ -337,10 +336,10 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             --  -----------------     
             putStr $ replicate 4 ' '
             putStr "|"
-            putStr $ replicate 19 ' ' 
+            putStr $ replicate 19 ' '
             setSGR [SetColor Foreground Vivid Red]
-            putStr "YOU " 
-            setSGR [Reset] 
+            putStr "YOU "
+            setSGR [Reset]
             putStr ("|" ++ replicate 26 ' ')
             putStrLn ""
             putStr $ replicate 4 ' ' ++ "+-----------------------+"
@@ -377,10 +376,10 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             --     -----------------         
             putStr $ replicate 6 ' '
             putStr $ replicate 9 ' '
-            putStr $ if l2 !!  0 == (Just NonExistant) then "               " else "+-------------" --first half
-            putStr $ if l2 !!  1 == (Just NonExistant) then "               " else "------------+"  --second half
+            putStr $ if head l2 == Just NonExistant then "               " else "+-------------" --first half
+            putStr $ if l2 !!  1 == Just NonExistant then "               " else "------------+"  --second half
             putStrLn ""
-          
+
             --      4      5        6       7
             --      |      |        |       |
             --      --------        ---------
@@ -389,7 +388,7 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             --          -----------------
             --                  |                     
             putStr $ replicate 6 ' '
-            putStr $ replicate 23 ' ' ++ ['|'] 
+            putStr $ replicate 23 ' ' ++ ['|']
             putStrLn ""
 
             --------- ROOT 
@@ -404,7 +403,7 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             --                  1 
             --              YOU |              
             putStr $ replicate 6 ' '
-            putStr $ replicate 22 ' ' ++ printItem (l1 !! 0) 
+            putStr $ replicate 22 ' ' ++ printItem (head l1)
             putStrLn ""
             putStr $ replicate 29 ' '
             putStr "|"
@@ -413,9 +412,9 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             putStr $ replicate 28 ' '
             putStr "YOU"
             setSGR [Reset]
-            putStrLn "" 
+            putStrLn ""
 
-            
+
 
 
 
@@ -435,8 +434,8 @@ step 6 : call prettyPrintHelper l c it dir
 -- TEST
 main :: IO ()
 main = do
-    let lists = [ [(Just Rock)], [(Just Spider), (Just Baby)], [Nothing, Nothing, (Just Rock) , (Just Rock)], [(Just Rock), (Just NonExistant), (Just NonExistant), (Just NonExistant), (Just NonExistant), (Just NonExistant), (Just NonExistant), (Just NonExistant)]]
-    
-    let cs = [[(Just Baby)], [Nothing, Nothing]]
+    let lists = [ [Just Rock], [Just Crow], [Nothing, Nothing, Just Rock , Just Rock], [Just Rock, Just NonExistant, Just NonExistant, Just NonExistant, Just NonExistant, Just NonExistant, Just NonExistant, Just NonExistant]]
+
+    let cs = [[], [Nothing, Nothing]]
 
     prettyPrintHelper lists cs (Just Rock) 1

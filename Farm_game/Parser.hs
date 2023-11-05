@@ -1,4 +1,6 @@
 {-# OPTIONS_GHC -Wno-noncanonical-monad-instances #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use lambda-case" #-}
 module Parser (runParser, parseCmd, parseInput) where
 
 import Cmd ( Cmd(..) )
@@ -34,7 +36,7 @@ instance Applicative (Parser tok) where
 -- For backtracking Parser
 instance Alternative (Parser tok) where
   empty :: Parser tok a
-  empty = Parser (\ts -> Nothing)
+  empty = Parser (const Nothing)
 
   (<|>) :: Parser tok a -> Parser tok a -> Parser tok a
   p1 <|> p2 = Parser (\ts -> case runParser p1 ts of
@@ -60,20 +62,16 @@ match s = sat (\s' -> map toLower s == map toLower s')
 
 -- We parse English digit words as digits
 number :: Parser String Int
-number = do
-  (match "one" >> return 1)    <|> (match "two" >> return 2) <|>
-   (match "three" >> return 3) <|> (match "four" >> return 4) <|>
-   (match "five" >> return 5)  <|> (match "six" >> return 6) <|>
-   (match "seven" >> return 7) <|> (match "eight" >> return 8) <|>
-   (match "nine" >> return 9)
+number = (match "one" >> return 1)    <|> (match "two" >> return 2) <|>
+ (match "three" >> return 3) <|> (match "four" >> return 4) <|>
+ (match "five" >> return 5)  <|> (match "six" >> return 6) <|>
+ (match "seven" >> return 7) <|> (match "eight" >> return 8) <|>
+ (match "nine" >> return 9)
 
 -- parseCmd is our general-purpose parser for command
 parseCmd :: Parser String Cmd
 parseCmd = parseClimb <|> parseAction <|> parseQuit
 
--- Parse a climbing or going command.
--- Parse a climbing or going command.
--- Parse a climbing or going command.
 -- Parse a climbing or going command.
 parseClimb :: Parser String Cmd
 parseClimb = do
@@ -83,11 +81,9 @@ parseClimb = do
         "left" -> Go_Left
         "right" -> Go_Right
         "back" -> Go_Back
-        "jflag" -> Go_Flag
-        _ -> Go_Flag
   where
     isDirection :: String -> Bool
-    isDirection s = map toLower s `elem` ["left", "right", "back", "jflag", "flag"]
+    isDirection s = map toLower s `elem` ["left", "right", "back"]
 
 
 
@@ -95,17 +91,15 @@ parseClimb = do
 -- Parse an action command
 parseAction :: Parser String Cmd
 parseAction = do
-    token1 <- (match "place" <|> match "do" <|> return "")
+    token1 <- match "place" <|> match "do" <|> return ""
     token2 <- sat isAction
     return $ case map toLower token2 of
         "shoot" -> Do_Shoot
         "collect" -> Do_Collect
-        "feed" -> Do_Feed
-        "pflag" -> Place_Flag
         _ -> Place_Flag -- Default to Do_Feed for single-word commands
   where
     isAction :: String -> Bool
-    isAction s = map toLower s `elem` ["shoot", "collect", "feed", "pflag", "flag"]
+    isAction s = map toLower s `elem` ["shoot", "collect"]
 
 
 -- Parse a quit command
