@@ -9,7 +9,7 @@ Return the trimmed version of the input tree
 ARG1 : tree
 ARG2 : depth at which to trim
 -}
-trimTree :: Bin a -> Int -> Bin a
+trimTree :: Bin Item -> Int -> Bin Item
 trimTree (Leaf x) _ = Leaf x
 trimTree (Node x left right) depth
     | depth == 0 = Leaf x
@@ -99,7 +99,7 @@ usage : ARG1 : list of the nodes at each level [[root], [children], [grandchildr
         ARG2 : list of the nodes of the sibling of the node we are at [[root], [children]]
         len root = 1, len children = 2
 
-        ARG3 : item found at the parent of the current node
+        ARG3 : thing found at the parent of the current node
 
         ARG4 : 0 = we took the left path (and have a right sibling)
                1 = we took the right path (and have a left sibling)
@@ -123,9 +123,8 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
         --        \/
         --  -------         --------
 
-        let checkIfExistant n = do
-              putStr (if (snd (l4 !! n)) == Just NonExistant then "+" else "\\/")
-                
+        let checkIfExistant n = putStr (if snd (l4 !! n) == Just NonExistant then "+" else "\\/")
+
         putStr $ replicate 7 ' '
         putStr " "
         checkIfExistant 1 --check if grandchild 1 has children (0 and 1)
@@ -150,41 +149,41 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
         --     |               |
         putStr $ replicate 8 ' '
         putStr "|"
-        if (fst (head l3)) == True then setBackPrint Green (replicate 13 ' ' ) else putStr $ replicate 13 ' '
+        if fst (head l3) then setBackPrint Green (replicate 13 ' ' ) else putStr $ replicate 13 ' '
         putStr "|"
         putStr $ replicate 13 ' '
         putStr "|"
-        if (fst (l3 !! 2)) == True then setBackPrint Green (replicate 13 ' ' ) else putStr $ replicate 13 ' '
+        if fst (l3 !! 2) then setBackPrint Green (replicate 13 ' ' ) else putStr $ replicate 13 ' '
         putStr "|"
         putStrLn ""
-        
+
 
         putStr $ replicate 6 ' '
         putStr $ printItem (snd (head l3))
-        if (fst (head l3)) == True then setBackPrint Green (replicate 9 ' ' ) else putStr $ replicate 9 ' '
+        if fst (head l3) then setBackPrint Green (replicate 9 ' ' ) else putStr $ replicate 9 ' '
         putStr $ printItem (snd (l3 !! 1))
         putStr $ replicate 10 ' '
         putStr $ printItem (snd (l3 !!2))
-        if (fst (l3 !! 2)) == True then setBackPrint Green (replicate 9 ' ' ) else putStr $ replicate 9 ' '
+        if fst (l3 !! 2) then setBackPrint Green (replicate 9 ' ' ) else putStr $ replicate 9 ' '
         putStr $ printItem (snd (l3 !! 3))
         putStrLn ""
 
         putStr $ replicate 8 ' '
         putStr "|"
-        if (fst (head l3)) == True then setBackPrint Green (replicate 13 ' ' ) else putStr $ replicate 13 ' '
+        if fst (head l3) then setBackPrint Green (replicate 13 ' ' ) else putStr $ replicate 13 ' '
         putStr "|"
         putStr $ replicate 13 ' '
         putStr "|"
-        if (fst (l3 !! 2)) == True then setBackPrint Green (replicate 13 ' ' ) else putStr $ replicate 13 ' '
+        if fst (l3 !! 2) then setBackPrint Green (replicate 13 ' ' ) else putStr $ replicate 13 ' '
         putStr "|"
         putStrLn ""
 
         putStr $ replicate 6 ' '
-        putStr $ if (snd (head l3)) == Just NonExistant then "     " else "  +------" --first half of first line
-        putStr $ if (snd (l3 !!  1)) == Just NonExistant then "     " else "-------+" --second half of first line
+        putStr $ if snd (head l3) == Just NonExistant then "     " else "  +------" --first half of first line
+        putStr $ if snd (l3 !!  1) == Just NonExistant then "     " else "-------+" --second half of first line
         printInColor Blue "-------------" -- non walkable fence
-        putStr $ if (snd (l3 !!  2)) == Just NonExistant then "     " else "+------" --first half of second line
-        putStr $ if (snd (l3 !!  3)) == Just NonExistant then "     " else "-------+" --second half of second line
+        putStr $ if snd (l3 !!  2) == Just NonExistant then "     " else "+------" --first half of second line
+        putStr $ if snd (l3 !!  3) == Just NonExistant then "     " else "-------+" --second half of second line
         putStrLn ""
 
 
@@ -203,26 +202,26 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
         putStr $ replicate 15 ' '
         if snd (head l3) == Just NonExistant
         then putStr " " -- Check that there is a node 
-        else if fst (head l3) == True
+        else if fst (head l3)
             then do
               putStr "|"
               setBackPrint Green (replicate 25 ' ')
             else putStr $ "|" ++ replicate 25 ' '
 
-        if (snd (l3 !! 2)) ==  Just NonExistant then putStr " " else putStr "|"
+        if snd (l3 !! 2) ==  Just NonExistant then putStr " " else putStr "|"
         putStrLn ""
 
 
         putStr $ replicate 13 ' '
-        putStr $ printItem (snd (head l2)) 
-        if (fst (head l2)) == True then setBackPrint Green (replicate 21 ' ') else putStr $ replicate 21 ' ' 
+        putStr $ printItem (snd (head l2))
+        if fst (head l2) then setBackPrint Green (replicate 21 ' ') else putStr $ replicate 21 ' '
         putStr $ printItem (snd (l2 !! 1))  --second item
         putStrLn ""
 
         putStr $ replicate 15 ' '
         if snd (head l3) == Just NonExistant
         then putStr " " -- Check that there is a node 
-        else if fst (head l3) == True
+        else if fst (head l3)
             then do
               putStr "|"
               setBackPrint Green (replicate 25 ' ')
@@ -238,10 +237,10 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             --     |               |
             --     -----------------          \/
             putStr $ replicate 15 ' '
-            putStr $ if (snd (head l2)) == Just NonExistant then "               " else "+-------------" --first half
-            putStr $ if (snd (l2 !!  1)) == Just NonExistant then "               " else "------------+"  --second half
+            putStr $ if snd (head l2) == Just NonExistant then "               " else "+-------------" --first half
+            putStr $ if snd (l2 !!  1) == Just NonExistant then "               " else "------------+"  --second half
             printInColor Blue "--------------" --non walkable fence
-            putStr $ if (snd (c2 !!  1)) == Just NonExistant then "+" else "\\/"
+            putStr $ if snd (c2 !!  1) == Just NonExistant then "+" else "\\/"
             putStrLn ""
 
             -- 4      5        6       7
@@ -255,16 +254,16 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             putStr $ replicate 6 ' '
             putStr $ replicate 23 ' ' ++ ['|']
             if fst (head l1)
-            then setBackPrint Green (replicate 26 ' ') 
-            else putStr $ replicate 26 ' ' 
+            then setBackPrint Green (replicate 26 ' ')
+            else putStr $ replicate 26 ' '
             putStr "|"
             putStrLn ""
 
             putStr $ replicate 6 ' '
             putStr $ replicate 22 ' ' ++printItem (snd (head l1))
             if fst (head l1)
-            then setBackPrint Green (replicate 21 ' ') 
-            else putStr $ replicate 21 ' ' 
+            then setBackPrint Green (replicate 21 ' ')
+            else putStr $ replicate 21 ' '
             putStr $ printItem (snd (head c1))
             putStrLn ""
 
@@ -284,8 +283,8 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             printInColor Red "YOU"
             putStr "|"
             if fst (head l1)
-            then setBackPrint Green (replicate 26 ' ') 
-            else putStr $ replicate 26 ' ' 
+            then setBackPrint Green (replicate 26 ' ')
+            else putStr $ replicate 26 ' '
             putStr "|"
             putStrLn ""
             putStr $ replicate 6 ' '
@@ -321,10 +320,10 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             --     |               |
             -- \/  -----------------         
             putStr $ replicate 4 ' '
-            putStr $ if (snd (c2 !!  1)) == Just NonExistant then "+" else "\\/"
+            putStr $ if snd (c2 !!  1) == Just NonExistant then "+" else "\\/"
             printInColor Blue "----------"
-            putStr $ if (snd (head l2)) == Just NonExistant then "               " else "+-------------" --first half
-            putStr $ if (snd (l2 !!  1)) == Just NonExistant then "               " else "------------+"  --second half
+            putStr $ if snd (head l2) == Just NonExistant then "               " else "+-------------" --first half
+            putStr $ if snd (l2 !!  1) == Just NonExistant then "               " else "------------+"  --second half
             putStrLn ""
 
             --      4      5        6       7
@@ -336,17 +335,17 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             -- |                |      
             -- 9                1                  
             putStr $ replicate 4 ' '
-            putStr ['|'] 
+            putStr ['|']
             if fst (head l1)
-            then setBackPrint Green (replicate 24 ' ') 
-            else putStr $ replicate 25 ' ' 
+            then setBackPrint Green (replicate 24 ' ')
+            else putStr $ replicate 25 ' '
             putStr ['|']
             putStrLn ""
             putStr $ replicate 2 ' '
             putStr $ printItem ( snd (head c1))
             if fst (head l1)
-            then setBackPrint Green (replicate 20 ' ') 
-            else putStr $ replicate 20 ' ' 
+            then setBackPrint Green (replicate 20 ' ')
+            else putStr $ replicate 20 ' '
             putStr $ printItem (snd (head l1))
             putStrLn ""
 
@@ -365,8 +364,8 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             putStr $ replicate 4 ' '
             putStr "|"
             if fst (head l1)
-            then setBackPrint Green (replicate 24 ' ') 
-            else putStr $ replicate 24 ' ' 
+            then setBackPrint Green (replicate 24 ' ')
+            else putStr $ replicate 24 ' '
             putStr "|"
             printInColor Red "YOU"
             putStrLn ""
@@ -404,8 +403,8 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             --     -----------------         
             putStr $ replicate 6 ' '
             putStr $ replicate 9 ' '
-            putStr $ if (snd (head l2)) == Just NonExistant then "               " else "+-------------" --first half
-            putStr $ if (snd (l2 !!  1)) == Just NonExistant then "               " else "------------+"  --second half
+            putStr $ if snd (head l2) == Just NonExistant then "               " else "+-------------" --first half
+            putStr $ if snd (l2 !!  1) == Just NonExistant then "               " else "------------+"  --second half
             putStrLn ""
 
             --      4      5        6       7
@@ -429,13 +428,50 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             putStr $ replicate 28 ' '
             printInColor Red "YOU"
             putStrLn ""
+prettyPrintHelper _ _ _ _ = do
+  putStrLn "OMG NO!!!"
 
+getsibling :: BinCxt Item -> Bin Item
+getsibling Hole = Leaf (False, Nothing)
+getsibling (B0 a b c) = c
+getsibling (B1 a b c) = b
 
+getParentThing :: BinCxt Item -> Maybe Thing
+getParentThing Hole = Nothing
+getParentThing (B0 (_,a) b c) = a
+getParentThing (B1 (_,a) b c) = a
 
+getdir :: BinCxt Item -> Int
+getdir Hole = 2
+getdir (B0 {}) = 1
+getdir (B1 {}) = 0
 
+prettyPrint :: BinZip Item -> IO() --might change the type signature to BinZip
+prettyPrint (b,c) = do
+  let trimmed = trimTree c 3
+  let balanced = balanceTree trimmed
+  --let l = levelLabels balanced
+  let l = [
+          [(False,Just Crow)],
+          [(False,Just Crow),(False,Just Crow)],
+          [(False,Just NonExistant),(False,Just NonExistant),(True,Just Rock),(True,Nothing)],
+          [(False,Just NonExistant),(False,Just NonExistant),(False,Just NonExistant),(False,Just NonExistant),(True,Just Rock),(True,Nothing),(False,Just Rock),(False,Just Rock)]
+          ]
+  --print l
+  let sibtree = getsibling b
+  let tst = trimTree sibtree 2
+  let btst = balanceTree tst
+  --let c = levelLabels btst
+  let c = [[(False, Just Rock)], [(False, Just NonExistant), (False, Just NonExistant)]]
+  --print c
+  --let it = getParentThing b
+  let it = Just Rock
+  print it
+  let dir = getdir b
+  print dir
+  prettyPrintHelper l c it 2
 
-prettyPrint :: Bin Item -> IO() --might change the type signature to BinZip
-prettyPrint = undefined
+  putStrLn ""
 {-
 step 1 : trim the tree to depth 4 (we need to get root, children, grandchildren, greatgrandchildren ONLY)
 step 2 : balance the tree
@@ -443,7 +479,7 @@ step 3 : get the list of the tree = l
 step 4 : get the list with the sibling and the children of the sibling = c
 step 5 : get the item at the parant of the current tree = it
 step 6 : fuigure out if the sibling goes left or right = dir
-step 6 : call prettyPrintHelper l c it dir
+step 7 : call prettyPrintHelper l c it dir
 -}
 
 
@@ -452,11 +488,7 @@ main :: IO ()
 main = do
     --let lists = [ [Just Rock], [Just Crow, Nothing], [Nothing, Nothing, Just Rock , Just Rock], [Just Rock, Just NonExistant, Just NonExistant, Just NonExistant, Just NonExistant, Just NonExistant, Just NonExistant, Just NonExistant]]
 
-    let lists = [[(True,Just Rock)], --l1
-                [(True, Nothing), (False, Nothing)], --l2
-                [(True,Nothing),(False,Nothing),(False,Just Rock),(False,Just Rock)], --l3
-                [(False,Just Rock),(False,Just Rock),(False,Just NonExistant),(False,Just NonExistant),(False,Just NonExistant),(False,Just NonExistant),(False,Just NonExistant),(False,Just NonExistant)]]
-    
-    let cs = [[(False, Just Rock)], [(False, Just NonExistant), (False, Just NonExistant)]]
-
-    prettyPrintHelper lists cs (Just Rock) 2
+    tree <- generateTree 5
+    ctree <- generateCrops tree 0.5
+    let treeContext = (Hole, ctree)
+    prettyPrint treeContext
