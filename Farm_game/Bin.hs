@@ -19,7 +19,6 @@ type BinZip a = (BinCxt a, Bin a)
 
 -- data structure to help us build a random binary tree 
 data SubtreeOption = LeftSubtree | RightSubtree | BothSubtrees
-    deriving (Show, Eq)
 
 -- debugger function : prints all the items found in a tree
 printLabels :: Bin Item -> IO ()
