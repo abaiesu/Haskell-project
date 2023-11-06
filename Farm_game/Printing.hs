@@ -1,5 +1,5 @@
+module Printing where
 import Bin
-
 import System.Console.ANSI
 
 
@@ -9,7 +9,7 @@ Return the trimmed version of the input tree
 ARG1 : tree
 ARG2 : depth at which to trim
 -}
-trimTree :: Bin Item -> Int -> Bin Item
+trimTree :: Bin a -> Int -> Bin a
 trimTree (Leaf x) _ = Leaf x
 trimTree (Node x left right) depth
     | depth == 0 = Leaf x
@@ -74,7 +74,7 @@ levelLabels tree = levelLabelsHelper [tree]
 printItem :: Maybe Thing -> String
 printItem (Just Rock) = "Rock "
 printItem (Just Crow) = "Crow "
-printItem (Just NonExistant) = " "
+printItem (Just NonExistant) = "     "
 printItem Nothing = "  O  "
 
 -- Print text in the specified color
@@ -91,6 +91,13 @@ setBackPrint color text = do
     putStr text
     setSGR [Reset]  -- Reset text color to default
 
+checkIfExistant :: [Item] -> Int -> [Item] -> Int -> IO ()
+checkIfExistant l3 m l4 n = do
+    let result
+          | snd (l3 !! m) == Just NonExistant = " "
+          | snd (l4 !! n) == Just NonExistant = "+"
+          | otherwise = "\\/"
+    putStr result
 
 {-
 usage : ARG1 : list of the nodes at each level [[root], [children], [grandchildren], [great grandchildren]]
@@ -99,7 +106,7 @@ usage : ARG1 : list of the nodes at each level [[root], [children], [grandchildr
         ARG2 : list of the nodes of the sibling of the node we are at [[root], [children]]
         len root = 1, len children = 2
 
-        ARG3 : thing found at the parent of the current node
+        ARG3 : item found at the parent of the current node
 
         ARG4 : 0 = we took the left path (and have a right sibling)
                1 = we took the right path (and have a left sibling)
@@ -118,115 +125,128 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
     then putStrLn "Error: The provided lists don't specify the requirements"
     else do
 
-        -------FURTHER NODES
-        --
-        --        \/
-        --  -------         --------
+        if snd (l2 !! 1) == Just NonExistant --if one of them is non existant, then the second one too and it's just a root
+        then putStr ""
+        else do
 
-        let checkIfExistant n = putStr (if snd (l4 !! n) == Just NonExistant then "+" else "\\/")
-
-        putStr $ replicate 7 ' '
-        putStr " "
-        checkIfExistant 1 --check if grandchild 1 has children (0 and 1)
-        printInColor Blue  "-------------" --put the field separtion
-
-        checkIfExistant 2 --check if grandchild 2 has children (2 and 3)
-        putStr $ replicate 13 ' '
-
-        checkIfExistant 4 --check if grandchild 3 has children (4 and 5)
-        printInColor Blue  "-------------" --put the field separtion
-
-        checkIfExistant 6 --check if grandchild 4 has children (6 and 7)
-        putStrLn ""
-
-        ------- GRANDCHILDREN 
-        --        \/
-        --  -------         --------
-        -- |      |        |       |
-        -- 4      5        6       7
-        -- |      |        |       |
-        -- --------        ---------
-        --     |               |
-        putStr $ replicate 8 ' '
-        putStr "|"
-        if fst (head l3) then setBackPrint Green (replicate 13 ' ' ) else putStr $ replicate 13 ' '
-        putStr "|"
-        putStr $ replicate 13 ' '
-        putStr "|"
-        if fst (l3 !! 2) then setBackPrint Green (replicate 13 ' ' ) else putStr $ replicate 13 ' '
-        putStr "|"
-        putStrLn ""
+          -------FURTHER NODES
+          --
+          --        \/
+          --  -------         --------
 
 
-        putStr $ replicate 6 ' '
-        putStr $ printItem (snd (head l3))
-        if fst (head l3) then setBackPrint Green (replicate 9 ' ' ) else putStr $ replicate 9 ' '
-        putStr $ printItem (snd (l3 !! 1))
-        putStr $ replicate 10 ' '
-        putStr $ printItem (snd (l3 !!2))
-        if fst (l3 !! 2) then setBackPrint Green (replicate 9 ' ' ) else putStr $ replicate 9 ' '
-        putStr $ printItem (snd (l3 !! 3))
-        putStrLn ""
+          putStr $ replicate 7 ' '
+          putStr " "
+          checkIfExistant l3 0 l4 1 --check if grandchild 1 has children (0 and 1)
+          if snd (head l3) /= Just NonExistant
+          then printInColor Blue  "-------------" --put the field separtion
+          else putStr "            " --if there is no grand child, nothing
 
-        putStr $ replicate 8 ' '
-        putStr "|"
-        if fst (head l3) then setBackPrint Green (replicate 13 ' ' ) else putStr $ replicate 13 ' '
-        putStr "|"
-        putStr $ replicate 13 ' '
-        putStr "|"
-        if fst (l3 !! 2) then setBackPrint Green (replicate 13 ' ' ) else putStr $ replicate 13 ' '
-        putStr "|"
-        putStrLn ""
+          checkIfExistant l3 1 l4 2 --check if grandchild 2 has children (2 and 3)
+          putStr $ replicate 13 ' '
 
-        putStr $ replicate 6 ' '
-        putStr $ if snd (head l3) == Just NonExistant then "     " else "  +------" --first half of first line
-        putStr $ if snd (l3 !!  1) == Just NonExistant then "     " else "-------+" --second half of first line
-        printInColor Blue "-------------" -- non walkable fence
-        putStr $ if snd (l3 !!  2) == Just NonExistant then "     " else "+------" --first half of second line
-        putStr $ if snd (l3 !!  3) == Just NonExistant then "     " else "-------+" --second half of second line
-        putStrLn ""
+          checkIfExistant l3 2 l4 4 --check if grandchild 3 has children (4 and 5)
+          if snd (l3 !! 2) /= Just NonExistant
+          then printInColor Blue  "-------------" --put the field separtion
+          else putStr "            "
 
+          checkIfExistant l3 3 l4 6 --check if grandchild 4 has children (6 and 7)
+          putStrLn ""
 
-        ---------- CHILDREN -------------------
-
-        --        \/
-        --  -------         --------
-        -- |      |        |       |
-        -- 4      5        6       7
-        -- |      |        |       |
-        -- --------        ---------
-        --     |               |
-        --     2               3
-        --     |               |
-
-        putStr $ replicate 15 ' '
-        if snd (head l3) == Just NonExistant
-        then putStr " " -- Check that there is a node 
-        else if fst (head l3)
-            then do
-              putStr "|"
-              setBackPrint Green (replicate 25 ' ')
-            else putStr $ "|" ++ replicate 25 ' '
-
-        if snd (l3 !! 2) ==  Just NonExistant then putStr " " else putStr "|"
-        putStrLn ""
+          ------- GRANDCHILDREN 
+          --        \/
+          --  -------         --------
+          -- |      |        |       |
+          -- 4      5        6       7
+          -- |      |        |       |
+          -- --------        ---------
+          --     |               |
+          putStr $ replicate 8 ' '
+          if snd (head l3) == Just NonExistant then putStr " " else putStr "|"
+          if fst (head l3) then setBackPrint Green (replicate 13 ' ' ) else putStr $ replicate 13 ' '
+          if snd (l3 !! 1) == Just NonExistant then putStr " " else putStr "|"
+          putStr $ replicate 13 ' '
+          if snd (l3 !! 2) == Just NonExistant then putStr " " else putStr "|"
+          if fst (l3 !! 2) then setBackPrint Green (replicate 13 ' ' ) else putStr $ replicate 13 ' '
+          if snd (l3 !! 3) == Just NonExistant then putStr " " else putStr "|"
+          putStrLn ""
 
 
-        putStr $ replicate 13 ' '
-        putStr $ printItem (snd (head l2))
-        if fst (head l2) then setBackPrint Green (replicate 21 ' ') else putStr $ replicate 21 ' '
-        putStr $ printItem (snd (l2 !! 1))  --second item
-        putStrLn ""
+          putStr $ replicate 6 ' '
+          putStr $ printItem (snd (head l3))
+          if fst (head l3) then setBackPrint Green (replicate 9 ' ' ) else putStr $ replicate 9 ' '
+          putStr $ printItem (snd (l3 !! 1))
+          putStr $ replicate 9 ' '
+          putStr $ printItem (snd (l3 !!2))
+          if fst (l3 !! 2) then setBackPrint Green (replicate 9 ' ' ) else putStr $ replicate 9 ' '
+          putStr $ printItem (snd (l3 !! 3))
+          putStrLn ""
 
-        putStr $ replicate 15 ' '
-        if snd (head l3) == Just NonExistant
-        then putStr " " -- Check that there is a node 
-        else if fst (head l3)
-            then do
-              putStr "|"
-              setBackPrint Green (replicate 25 ' ')
-            else putStr $ "|" ++ replicate 25 ' '
-        putStrLn "|"
+          putStr $ replicate 8 ' '
+          if snd (head l3) == Just NonExistant then putStr " " else putStr "|"
+          if fst (head l3) then setBackPrint Green (replicate 13 ' ' ) else putStr $ replicate 13 ' '
+          if snd (l3 !! 1) == Just NonExistant then putStr " " else putStr "|"
+          putStr $ replicate 13 ' '
+          if snd (l3 !! 2) == Just NonExistant then putStr " " else putStr "|"
+          if fst (l3 !! 2) then setBackPrint Green (replicate 13 ' ' ) else putStr $ replicate 13 ' '
+          if snd (l3 !! 3) == Just NonExistant then putStr " " else putStr "|"
+          putStrLn ""
+
+          putStr $ replicate 6 ' '
+          if snd (l3 !!  1) == Just NonExistant
+          then do
+             putStr $ replicate 9 ' '
+             printInColor Blue "+-------"
+          else do
+            putStr $ if snd (head l3) == Just NonExistant then "          " else "  +------" --first half of first line
+            if snd (l3 !!  1) == Just NonExistant then printInColor Blue "+------" else putStr "-------+" --second half of first line
+
+          if snd (l3 !!  3) == Just NonExistant then printInColor Blue "-----------------+"  else printInColor Blue "-------------" -- non walkable fence
+          putStr $ if snd (l3 !!  2) == Just NonExistant then "     " else "+------" --first half of second line
+          putStr $ if snd (l3 !!  3) == Just NonExistant then "     " else "-------+" --second half of second line
+          putStrLn ""
+
+
+          ---------- CHILDREN -------------------
+
+          --        \/
+          --  -------         --------
+          -- |      |        |       |
+          -- 4      5        6       7
+          -- |      |        |       |
+          -- --------        ---------
+          --     |               |
+          --     2               3
+          --     |               |
+
+          putStr $ replicate 15 ' '
+          if snd (head l2) == Just NonExistant
+          then putStr "  "
+          else if fst (head l2)
+              then do
+                putStr "|"
+                setBackPrint Green (replicate 25 ' ')
+              else putStr $ "|" ++ replicate 25 ' '
+
+          if snd (l2 !! 1) == Just NonExistant then putStr " " else putStr "|"
+          putStrLn ""
+
+
+          putStr $ replicate 13 ' '
+          putStr $ printItem (snd (head l2))
+          if fst (head l2) then setBackPrint Green (replicate 21 ' ') else putStr $ replicate 21 ' '
+          putStr $ printItem (snd (l2 !! 1))  --second item
+          putStrLn ""
+
+          putStr $ replicate 15 ' '
+          if snd (head l2) == Just NonExistant
+          then putStr " " -- Check that there is a node 
+          else if fst (head l2)
+              then do
+                putStr "|"
+                setBackPrint Green (replicate 25 ' ')
+              else putStr $ "|" ++ replicate 25 ' '
+          putStrLn "|"
 
         if dir == 0 then do --the sibling is on the right
             -- 4      5        6       7
@@ -239,8 +259,11 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             putStr $ replicate 15 ' '
             putStr $ if snd (head l2) == Just NonExistant then "               " else "+-------------" --first half
             putStr $ if snd (l2 !!  1) == Just NonExistant then "               " else "------------+"  --second half
-            printInColor Blue "--------------" --non walkable fence
-            putStr $ if snd (c2 !!  1) == Just NonExistant then "+" else "\\/"
+            -- check if the current position is a leaf
+            if snd (l2 !!  1) == Just NonExistant then putStr " " else printInColor Blue "--------------" --non walkable fence
+            if snd (l2 !!  1) /= Just NonExistant
+            then putStr $ if snd (c2 !!  1) == Just NonExistant then  "+" else "\\/"
+            else putStr ""
             putStrLn ""
 
             -- 4      5        6       7
@@ -318,13 +341,16 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             --     |               |
             --     2               3
             --     |               |
-            -- \/  -----------------         
-            putStr $ replicate 4 ' '
-            putStr $ if snd (c2 !!  1) == Just NonExistant then "+" else "\\/"
-            printInColor Blue "----------"
-            putStr $ if snd (head l2) == Just NonExistant then "               " else "+-------------" --first half
-            putStr $ if snd (l2 !!  1) == Just NonExistant then "               " else "------------+"  --second half
-            putStrLn ""
+            -- \/  -----------------  
+            if snd (head l2) == Just NonExistant
+            then putStrLn ""
+            else do
+              putStr $ replicate 4 ' '
+              putStr $ if snd (c2 !!  1) == Just NonExistant then "+" else "\\/"
+              printInColor Blue "----------"
+              putStr $ if snd (head l2) == Just NonExistant then "               " else "+-------------" --first half
+              putStr $ if snd (l2 !!  1) == Just NonExistant then "               " else "------------+"  --second half
+              putStrLn ""
 
             --      4      5        6       7
             --      |      |        |       |
@@ -428,8 +454,8 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             putStr $ replicate 28 ' '
             printInColor Red "YOU"
             putStrLn ""
-prettyPrintHelper _ _ _ _ = do
-  putStrLn "OMG NO!!!"
+prettyPrintHelper a b c d = do
+  putStrLn ""
 
 getsibling :: BinCxt Item -> Bin Item
 getsibling Hole = Leaf (False, Nothing)
@@ -443,33 +469,34 @@ getParentThing (B1 (_,a) b c) = a
 
 getdir :: BinCxt Item -> Int
 getdir Hole = 2
-getdir (B0 {}) = 1
-getdir (B1 {}) = 0
+getdir (B0 {}) = 0
+getdir (B1 {}) = 1
 
 prettyPrint :: BinZip Item -> IO() --might change the type signature to BinZip
 prettyPrint (b,c) = do
   let trimmed = trimTree c 3
   let balanced = balanceTree trimmed
-  --let l = levelLabels balanced
-  let l = [
-          [(False,Just Crow)],
-          [(False,Just Crow),(False,Just Crow)],
-          [(False,Just NonExistant),(False,Just NonExistant),(True,Just Rock),(True,Nothing)],
-          [(False,Just NonExistant),(False,Just NonExistant),(False,Just NonExistant),(False,Just NonExistant),(True,Just Rock),(True,Nothing),(False,Just Rock),(False,Just Rock)]
-          ]
-  --print l
+  let l2 = levelLabels balanced
+  if length l2 <4
+    then putStrLn "OH NO YOU FELL IN THE RIVER! GO BACK"
+    else putStr ""
+  let l' = if length l2>=3 && length (l2!!3)==6
+              then [head l2,l2!!1,l2!!2,l2!!3++[(False, Just NonExistant), (False, Just NonExistant)]]
+              else l2
+  let l = if length l2>=3 && length (l'!!3)==4
+              then [head l',l'!!1,l'!!2,l'!!3++[(False, Just NonExistant), (False, Just NonExistant),(False, Just NonExistant), (False, Just NonExistant)]]
+              else l'
   let sibtree = getsibling b
-  let tst = trimTree sibtree 2
+  let tst = trimTree sibtree 1
   let btst = balanceTree tst
-  --let c = levelLabels btst
-  let c = [[(False, Just Rock)], [(False, Just NonExistant), (False, Just NonExistant)]]
-  --print c
-  --let it = getParentThing b
-  let it = Just Rock
-  print it
+  let c = levelLabels btst
+  let c' = if length c == 1
+             then c ++ [[(False, Just NonExistant), (False, Just NonExistant)]]
+             else c
+  --let c = [[(False, Just Rock)], [(False, Just NonExistant), (False, Just NonExistant)]]
+  let it = getParentThing b
   let dir = getdir b
-  print dir
-  prettyPrintHelper l c it 2
+  prettyPrintHelper l c' it dir
 
   putStrLn ""
 {-
@@ -479,15 +506,34 @@ step 3 : get the list of the tree = l
 step 4 : get the list with the sibling and the children of the sibling = c
 step 5 : get the item at the parant of the current tree = it
 step 6 : fuigure out if the sibling goes left or right = dir
-step 7 : call prettyPrintHelper l c it dir
+step 6 : call prettyPrintHelper l c it dir
 -}
 
 
 -- TEST
-main :: IO ()
+{-main :: IO ()
 main = do
-    --let lists = [ [Just Rock], [Just Crow, Nothing], [Nothing, Nothing, Just Rock , Just Rock], [Just Rock, Just NonExistant, Just NonExistant, Just NonExistant, Just NonExistant, Just NonExistant, Just NonExistant, Just NonExistant]]
 
+    {-let lists = [[(True,Just Rock)], --l1
+                [(True, Nothing), (False, Nothing)], --l2
+                [(True,Nothing),(False,Nothing),(False,Just Rock),(False,Just Rock)], --l3
+                [(False,Just Rock),(False,Just Rock),(False,Just NonExistant),(False,Just NonExistant),(False,Just NonExistant),(False,Just NonExistant),(False,Just NonExistant),(False,Just NonExistant)]]-}
+
+    let lists = [[(False,Just Crow)],
+      [(False,Just Crow),(False,Just Crow)],
+      [(False,Just NonExistant),(False,Just NonExistant),(True,Just Rock),(True,Nothing)],
+      [(False,Just NonExistant),(False,Just NonExistant),(False,Just NonExistant),(False,Just NonExistant),(True,Just Rock),(True,Nothing),(False,Just Rock),(False,Just Rock)]
+      ]
+
+
+    let cs = [[(False, Just Rock)], [(False, Just NonExistant), (False, Just NonExistant)]]
+    
+    --let cs = [[(False, Just Rock)], [(False, Just NonExistant), (False, Just NonExistant)]]
+
+    prettyPrintHelper lists cs (Just Rock) 2-}
+
+mainwhat :: IO ()
+mainwhat = do
     tree <- generateTree 5
     ctree <- generateCrops tree 0.5
     let treeContext = (Hole, ctree)

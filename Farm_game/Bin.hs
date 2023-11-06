@@ -19,7 +19,6 @@ type BinZip a = (BinCxt a, Bin a)
 
 -- data structure to help us build a random binary tree 
 data SubtreeOption = LeftSubtree | RightSubtree | BothSubtrees
-    deriving (Show, Eq)
 
 -- debugger function : prints all the items found in a tree
 printLabels :: Bin Item -> IO ()
@@ -69,18 +68,9 @@ else do
 -- gives the zipper after going 1 back
 -- arguement is a Binzip
 go_back :: BinZip Item -> BinZip Item
+go_back (B0 a b1 b2, t) = (b1, Node a t b2)
+go_back (B1 a b1 b2, t) = (b2, Node a b1 t)
 go_back (hole, t) = (hole, t)
-go_back (b, t) = case pathFather b of
-  hole -> (hole, t)
-  (B0 a b1 b2) -> (b1, Node a b2 t)
-  (B1 a b1 b2) -> (b2, Node a t b1)
-
--- father of the current node
--- arguement is a context 
-pathFather :: BinCxt Item -> BinCxt Item
-pathFather hole = hole
-pathFather (B0 a b1 b2) = b1
-pathFather (B1 a b1 b2) = b2
 
 
 -- generate a random Item (Rock, Crow or Nothing) 
@@ -90,7 +80,7 @@ randomItem = do
     randomNumber <- randomIO :: IO Int
     if even randomNumber
         then return (False, Nothing)
-        else if (randomNumber `mod` 4) == 1
+        else if randomNumber `mod` 4 == 1
             then return (False, Just Rock)
             else return (False, Just Crow)
 
@@ -144,20 +134,6 @@ generateCrops (Node item left right) p = do
             newLeft <- generateCrops left p
             newRight <- generateCrops right p
             return (Node item newLeft newRight)
-
--- generates crops randomly in a context and tree
--- arguements are the context and the probaility
-genCropCxt :: BinCxt Item -> Float -> IO (BinCxt Item)
-genCropCxt Hole _= return Hole
-genCropCxt (B0 a cxt bin) p = do
-    newBin <- generateCrops bin p
-    newCxt <- genCropCxt cxt p
-    return (B0 a newCxt newBin)
-genCropCxt (B1 a bin cxt) p= do
-    newBin <- generateCrops bin p
-    newCxt <- genCropCxt cxt p
-    return (B1 a newBin newCxt)
-
 
 -- get the number of nodes with Nothing
 countNothingNodes :: Bin Item -> Int
@@ -216,8 +192,7 @@ updateCrowNode (Leaf (True, Just Crow)) p= do
 updateCrowNode (Node (True, Just Crow) _ _) p = do
     shouldUpdate <- randomRIO (0 :: Int, p) -- 1/3 probability
     return (shouldUpdate == 0)  -- Return True or False based on the random value
-updateCrowNode _ _ = do
-    return False
+updateCrowNode _ _ = return False
 
 
 -- Function goes through the whole tree to check if crow will eat or not
@@ -245,4 +220,34 @@ plug :: BinZip Item -> Bin Item
 plug (Hole,t) = t
 plug (B0 a c t2,t) = plug (c,Node a t t2)
 plug (B1 a t1 c ,t) = plug (c,Node a t1 t)
+
+-- takes a tree and flips it
+fliptree :: Bin Item -> Bin Item
+fliptree (Node a b c) = Node a c b
+fliptree (Leaf a) = Leaf a
+
+-- give the depth of the left child of a tree
+ldepth :: Bin Item -> Int
+ldepth (Leaf a) = 0
+ldepth (Node a b c) = max (rdepth b +1) (ldepth b +1)
+
+-- give the depth of the right child of a tree
+rdepth :: Bin Item -> Int
+rdepth (Leaf a) = 1
+rdepth (Node a b c) = max (rdepth c +1) (ldepth c +1)
+
+
+-- Lazily evaluates the infinitr Tree!!!
+geninftree :: IO (Bin Item)
+geninftree = generateTree 10 >>= replaceLeavesWithTree 5
+
+replaceLeavesWithTree :: Int -> Bin Item -> IO (Bin Item)
+replaceLeavesWithTree depthThreshold (Leaf _) | depthThreshold >= 5 = generateTree 10
+replaceLeavesWithTree _ leaf@(Leaf _) = return leaf
+replaceLeavesWithTree depthThreshold (Node a left right) = do
+    newLeft <- replaceLeavesWithTree depthThreshold left
+    newRight <- replaceLeavesWithTree depthThreshold right
+    return (Node a newLeft newRight)
+
+
 
