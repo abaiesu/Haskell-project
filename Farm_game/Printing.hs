@@ -370,8 +370,8 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             putStr $ replicate 2 ' '
             putStr $ printItem ( snd (head c1))
             if fst (head l1)
-            then setBackPrint Green (replicate 20 ' ')
-            else putStr $ replicate 20 ' '
+            then setBackPrint Green (replicate 20 ' ') 
+            else putStr $ replicate 21 ' ' 
             putStr $ printItem (snd (head l1))
             putStrLn ""
 
@@ -390,12 +390,12 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             putStr $ replicate 4 ' '
             putStr "|"
             if fst (head l1)
-            then setBackPrint Green (replicate 24 ' ')
-            else putStr $ replicate 24 ' '
+            then setBackPrint Green (replicate 24 ' ') 
+            else putStr $ replicate 25 ' ' 
             putStr "|"
             printInColor Red "YOU"
             putStrLn ""
-            putStr $ replicate 4 ' ' ++ "+-----------------------+"
+            putStr $ replicate 4 ' ' ++ "+-------------------------+"
             putStrLn ""
 
 
@@ -532,9 +532,11 @@ main = do
 
     prettyPrintHelper lists cs (Just Rock) 2-}
 
-mainwhat :: IO ()
-mainwhat = do
-    tree <- generateTree 5
-    ctree <- generateCrops tree 0.5
-    let treeContext = (Hole, ctree)
-    prettyPrint treeContext
+main :: IO ()
+main = do
+    let lists = [[(False,Just Rock)],[(True,Just Rock),(True,Just Crow)],[(False,Just NonExistant),(False,Just NonExistant),(True,Just Rock),(True,Just Crow)],[(False,Just NonExistant),(False,Just NonExistant),(False,Just NonExistant),(False,Just NonExistant),(True,Just Rock),(True,Just Rock),(False,Just Crow),(False,Nothing)]]
+    
+    --let lists = [[(False,Just Crow)],[(True,Just Rock),(True,Nothing)],[(True,Just Rock),(True,Just Rock),(True,Nothing),(True,Just Crow)],[(False,Nothing),(False,Just Rock),(False,Nothing),(False,Just Crow),(False,Just NonExistant),(False,Just NonExistant),(False,Just NonExistant),(False,Just NonExistant)]]
+    let cs = [[(False, Just Rock)], [(False, Just NonExistant), (False, Just NonExistant)]]
+
+    prettyPrintHelper lists cs (Just Rock) 1

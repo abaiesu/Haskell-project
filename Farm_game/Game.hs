@@ -93,8 +93,8 @@ repl= do
     go :: GameState -> Bin Item -> IO ()
     go gameState inittree= do
         let (z2,z3) = binZip gameState
-        z4 <- generateCrops z3 0.05
-        (z5, neg) <- updateCrowEat z4 0 300 
+        z4 <- generateCrops z3 0.01
+        (z5, neg) <- updateCrowEat z4 0 1000
         let z = (z2,z4)
         prettyPrint z
         case z of
