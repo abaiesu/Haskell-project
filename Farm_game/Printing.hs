@@ -453,7 +453,7 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             printInColor Red "YOU"
             putStrLn ""
 prettyPrintHelper a b c d = do
-  putStrLn ""
+  putStrLn "Error ! Your input doesn't follow the requirements"
 
 getsibling :: BinCxt Item -> Bin Item
 getsibling Hole = Leaf (False, Nothing)
