@@ -74,7 +74,7 @@ levelLabels tree = levelLabelsHelper [tree]
 printItem :: Maybe Thing -> String
 printItem (Just Rock) = "Rock "
 printItem (Just Crow) = "Crow "
-printItem (Just NonExistant) = " "
+printItem (Just NonExistant) = "     "
 printItem Nothing = "  O  "
 
 -- Print text in the specified color
@@ -274,7 +274,6 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             --     -----------------             \/
             --             |                      |
             --             1                      9
-
             putStr $ replicate 6 ' '
             putStr $ replicate 23 ' ' ++ ['|']
             if fst (head l1)
