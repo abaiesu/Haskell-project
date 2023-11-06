@@ -453,7 +453,7 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             printInColor Red "YOU"
             putStrLn ""
 prettyPrintHelper a b c d = do
-  putStrLn "Error ! Your input doesn't follow the requirements"
+  putStrLn ""
 
 getsibling :: BinCxt Item -> Bin Item
 getsibling Hole = Leaf (False, Nothing)
@@ -473,16 +473,21 @@ getdir (B1 {}) = 1
 -- Prints the current position
 prettyPrint :: BinZip Item -> IO() 
 prettyPrint (b,c) = do
-  let trimmed = trimTree c 3
+  let trimmed = if maxDepth c >3 
+                  then trimTree c 3
+                  else fill c 3
   let balanced = balanceTree trimmed
+  if isBalanced balanced 
+    then putStr ""
+    else putStrLn "Oh no not balanced"
   let l2 = levelLabels balanced
   if length l2 <4
     then putStrLn "OH NO YOU FELL IN THE RIVER! GO BACK"
     else putStr ""
-  let l' = if length l2>=3 && length (l2!!3)==6
+  let l' = if length l2>3 && length (l2!!3)==6
               then [head l2,l2!!1,l2!!2,l2!!3++[(False, Just NonExistant), (False, Just NonExistant)]]
               else l2
-  let l = if length l2>=3 && length (l'!!3)==4
+  let l = if length l'>3 && length (l'!!3)==4
               then [head l',l'!!1,l'!!2,l'!!3++[(False, Just NonExistant), (False, Just NonExistant),(False, Just NonExistant), (False, Just NonExistant)]]
               else l'
   let sibtree = getsibling b
