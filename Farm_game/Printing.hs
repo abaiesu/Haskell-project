@@ -391,7 +391,7 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             putStr "|"
             if fst (head l1)
             then setBackPrint Green (replicate 24 ' ') 
-            else putStr $ replicate 24 ' ' 
+            else putStr $ replicate 25 ' ' 
             putStr "|"
             printInColor Red "YOU"
             putStrLn ""
@@ -539,4 +539,4 @@ main = do
     --let lists = [[(False,Just Crow)],[(True,Just Rock),(True,Nothing)],[(True,Just Rock),(True,Just Rock),(True,Nothing),(True,Just Crow)],[(False,Nothing),(False,Just Rock),(False,Nothing),(False,Just Crow),(False,Just NonExistant),(False,Just NonExistant),(False,Just NonExistant),(False,Just NonExistant)]]
     let cs = [[(False, Just Rock)], [(False, Just NonExistant), (False, Just NonExistant)]]
 
-    prettyPrintHelper lists cs (Just Rock) 0
+    prettyPrintHelper lists cs (Just Rock) 1
