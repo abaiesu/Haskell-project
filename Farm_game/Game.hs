@@ -1,6 +1,6 @@
 
 import Bin
-import Printing
+import Printing (prettyPrint)
 import Cmd
 import Parser ( parseCmd, parseInput )
 import System.IO ( hFlush, stdout )
@@ -14,47 +14,6 @@ data GameState = GameState {
     rocksCollected :: Int,
     points :: Int
 }
-
-
-
-{-prettyPrintBin :: Show a => Int -> Bin a -> String
-prettyPrintBin maxDepth bin = prettyPrintBin' 0 "" True bin
-  where
-    prettyPrintBin' currentDepth prefix isTail bin =
-        case bin of
-            Leaf Nothing ->
-                prefix ++ "└── Empty\n"
-            Leaf (Just x) ->
-                prefix ++ "└── " ++ show x ++ "\n"
-            Node Nothing left right ->
-                if currentDepth == (maxDepth - 1) 
-                then prefix ++ "└── " ++ "Empty" ++ "..." ++ "\n"
-                else prefix ++ "└── " ++ "Empty" ++ "\n" ++
-                    prettyPrintBin' (currentDepth + 1) (prefix ++ (if isTail then "    " else "│   ")) True left ++
-                    prettyPrintBin' (currentDepth + 1) (prefix ++ (if isTail then "    " else "│   ")) False right 
-            Node (Just x) left right ->
-                if currentDepth == (maxDepth - 1) 
-                then prefix ++ "└── " ++ show x ++ "..." ++ "\n"
-                else prefix ++ "└── " ++ show x ++ "\n" ++
-                    prettyPrintBin' (currentDepth + 1) (prefix ++ (if isTail then "    " else "│   ")) True left ++
-                    prettyPrintBin' (currentDepth + 1) (prefix ++ (if isTail then "    " else "│   ")) False right 
-            
-
-
-main :: IO ()
-main = do
-  let tree1 =
-        Node (Just 1)
-          (Node (Just 2) (Leaf (Just 3)) (Node Nothing (Leaf Nothing) (Leaf (Just 5))))
-          (Node (Just 4) (Leaf (Just 5)) (Node (Just 6) (Leaf (Just 7)) (Leaf (Just 8))))
-    
-  tree2 <- generateTree 2
-
-  putStrLn (prettyPrintBin 3 tree1)
-  --putStrLn "\n\n"
-  --putStrLn (prettyPrintBin 3 tree2)-}
-
-
 
 
 

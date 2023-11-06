@@ -2,8 +2,6 @@ module Printing where
 import Bin
 import System.Console.ANSI
 
-
-
 {-
 Return the trimmed version of the input tree
 ARG1 : tree
@@ -399,7 +397,7 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             putStrLn ""
 
 
-              --      4      5        6       7
+            --      4      5        6       7
             --      |      |        |       |
             --      --------        ---------
             --          |               |
@@ -472,7 +470,8 @@ getdir Hole = 2
 getdir (B0 {}) = 0
 getdir (B1 {}) = 1
 
-prettyPrint :: BinZip Item -> IO() --might change the type signature to BinZip
+-- Prints the current position
+prettyPrint :: BinZip Item -> IO() 
 prettyPrint (b,c) = do
   let trimmed = trimTree c 3
   let balanced = balanceTree trimmed
@@ -493,7 +492,6 @@ prettyPrint (b,c) = do
   let c' = if length c == 1
              then c ++ [[(False, Just NonExistant), (False, Just NonExistant)]]
              else c
-  --let c = [[(False, Just Rock)], [(False, Just NonExistant), (False, Just NonExistant)]]
   let it = getParentThing b
   let dir = getdir b
   prettyPrintHelper l c' it dir
@@ -510,33 +508,4 @@ step 6 : call prettyPrintHelper l c it dir
 -}
 
 
--- TEST
-{-main :: IO ()
-main = do
 
-    {-let lists = [[(True,Just Rock)], --l1
-                [(True, Nothing), (False, Nothing)], --l2
-                [(True,Nothing),(False,Nothing),(False,Just Rock),(False,Just Rock)], --l3
-                [(False,Just Rock),(False,Just Rock),(False,Just NonExistant),(False,Just NonExistant),(False,Just NonExistant),(False,Just NonExistant),(False,Just NonExistant),(False,Just NonExistant)]]-}
-
-    let lists = [[(False,Just Crow)],
-      [(False,Just Crow),(False,Just Crow)],
-      [(False,Just NonExistant),(False,Just NonExistant),(True,Just Rock),(True,Nothing)],
-      [(False,Just NonExistant),(False,Just NonExistant),(False,Just NonExistant),(False,Just NonExistant),(True,Just Rock),(True,Nothing),(False,Just Rock),(False,Just Rock)]
-      ]
-
-
-    let cs = [[(False, Just Rock)], [(False, Just NonExistant), (False, Just NonExistant)]]
-    
-    --let cs = [[(False, Just Rock)], [(False, Just NonExistant), (False, Just NonExistant)]]
-
-    prettyPrintHelper lists cs (Just Rock) 2-}
-
-main :: IO ()
-main = do
-    let lists = [[(False,Just Rock)],[(True,Just Rock),(True,Just Crow)],[(False,Just NonExistant),(False,Just NonExistant),(True,Just Rock),(True,Just Crow)],[(False,Just NonExistant),(False,Just NonExistant),(False,Just NonExistant),(False,Just NonExistant),(True,Just Rock),(True,Just Rock),(False,Just Crow),(False,Nothing)]]
-    
-    --let lists = [[(False,Just Crow)],[(True,Just Rock),(True,Nothing)],[(True,Just Rock),(True,Just Rock),(True,Nothing),(True,Just Crow)],[(False,Nothing),(False,Just Rock),(False,Nothing),(False,Just Crow),(False,Just NonExistant),(False,Just NonExistant),(False,Just NonExistant),(False,Just NonExistant)]]
-    let cs = [[(False, Just Rock)], [(False, Just NonExistant), (False, Just NonExistant)]]
-
-    prettyPrintHelper lists cs (Just Rock) 1
