@@ -226,28 +226,15 @@ fliptree :: Bin Item -> Bin Item
 fliptree (Node a b c) = Node a c b
 fliptree (Leaf a) = Leaf a
 
--- give the depth of the left child of a tree
-ldepth :: Bin Item -> Int
-ldepth (Leaf a) = 0
-ldepth (Node a b c) = max (rdepth b +1) (ldepth b +1)
-
--- give the depth of the right child of a tree
-rdepth :: Bin Item -> Int
-rdepth (Leaf a) = 1
-rdepth (Node a b c) = max (rdepth c +1) (ldepth c +1)
-
-
--- Lazily evaluates the infinitr Tree!!!
-geninftree :: IO (Bin Item)
-geninftree = generateTree 10 >>= replaceLeavesWithTree 5
-
-replaceLeavesWithTree :: Int -> Bin Item -> IO (Bin Item)
-replaceLeavesWithTree depthThreshold (Leaf _) | depthThreshold >= 5 = generateTree 10
-replaceLeavesWithTree _ leaf@(Leaf _) = return leaf
-replaceLeavesWithTree depthThreshold (Node a left right) = do
-    newLeft <- replaceLeavesWithTree depthThreshold left
-    newRight <- replaceLeavesWithTree depthThreshold right
+replaceLeavesWithTree :: Int -> Bin Item -> Bin Item -> IO (Bin Item)
+replaceLeavesWithTree depthThreshold (Leaf _) init | depthThreshold >= 4 = return init
+replaceLeavesWithTree _ leaf@(Leaf _) _ = return leaf
+replaceLeavesWithTree depthThreshold (Node a left right) init = do
+    newLeft <- replaceLeavesWithTree depthThreshold left init
+    newRight <- replaceLeavesWithTree depthThreshold right init
     return (Node a newLeft newRight)
+
+
 
 
 

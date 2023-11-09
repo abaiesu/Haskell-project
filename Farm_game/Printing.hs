@@ -13,8 +13,6 @@ trimTree (Node x left right) depth
     | depth == 0 = Leaf x
     | otherwise   = Node x (trimTree left (depth - 1)) (trimTree right (depth - 1))
 
-
-
 --Gets the max depth of a tree
 maxDepth :: Bin Item -> Int
 maxDepth (Leaf _) = 1
@@ -24,15 +22,14 @@ maxDepth (Node _ left right) = 1 + max (maxDepth left) (maxDepth right)
 fill :: Bin Item -> Int -> Bin Item
 fill tree 0 = tree
 fill (Leaf item) n = Node item (fill (Leaf (False, Just NonExistant)) (n-1)) (fill (Leaf (False, Just NonExistant)) (n-1))
-fill (Node item left right) n = Node item (balanceTree left) (balanceTree right)
+fill (Node item left right) n = Node item (fill left (n-1)) (fill right (n-1))
 
 -- Takes in a non-balanced tree and returns a balanced version with non-existant nodes
 balanceTree :: Bin Item -> Bin Item
 balanceTree (Leaf item) = Leaf item
-balanceTree (Node item left right) = Node item (fill left n) (fill right m)
+balanceTree (Node item left right) = Node item (fill left n) (fill right n)
   where
-    n = maxDepth (Node item left right) - maxDepth left - 1
-    m = maxDepth (Node item left right) - maxDepth right - 1
+    n = max (maxDepth left) (maxDepth right) -1 
 
 
 
@@ -453,7 +450,7 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
             printInColor Red "YOU"
             putStrLn ""
 prettyPrintHelper a b c d = do
-  putStrLn "Error ! Your input doesn't follow the requirements"
+  putStrLn ""
 
 getsibling :: BinCxt Item -> Bin Item
 getsibling Hole = Leaf (False, Nothing)
@@ -473,28 +470,25 @@ getdir (B1 {}) = 1
 -- Prints the current position
 prettyPrint :: BinZip Item -> IO() 
 prettyPrint (b,c) = do
-  let trimmed = trimTree c 3
+  let trimmed = if maxDepth c >3 
+                  then trimTree c 3
+                  else fill c 3
   let balanced = balanceTree trimmed
-  let l2 = levelLabels balanced
-  if length l2 <4
+  if isBalanced balanced 
+    then putStr ""
+    else putStrLn "Oh no not balanced"
+  let l = levelLabels balanced
+  if length l <4
     then putStrLn "OH NO YOU FELL IN THE RIVER! GO BACK"
     else putStr ""
-  let l' = if length l2>=3 && length (l2!!3)==6
-              then [head l2,l2!!1,l2!!2,l2!!3++[(False, Just NonExistant), (False, Just NonExistant)]]
-              else l2
-  let l = if length l2>=3 && length (l'!!3)==4
-              then [head l',l'!!1,l'!!2,l'!!3++[(False, Just NonExistant), (False, Just NonExistant),(False, Just NonExistant), (False, Just NonExistant)]]
-              else l'
   let sibtree = getsibling b
   let tst = trimTree sibtree 1
-  let btst = balanceTree tst
+  let tst' = fill tst 1
+  let btst = balanceTree tst'
   let c = levelLabels btst
-  let c' = if length c == 1
-             then c ++ [[(False, Just NonExistant), (False, Just NonExistant)]]
-             else c
   let it = getParentThing b
   let dir = getdir b
-  prettyPrintHelper l c' it dir
+  prettyPrintHelper l c it dir
 
   putStrLn ""
 {-
@@ -508,4 +502,9 @@ step 6 : call prettyPrintHelper l c it dir
 -}
 
 
-
+smoltest :: IO()
+smoltest = do
+  tree <- generateTree 5
+  let treez = (Hole, tree)
+  prettyPrint treez 
+  putStrLn ""

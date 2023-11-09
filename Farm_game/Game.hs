@@ -1,6 +1,6 @@
 
 import Bin
-import Printing (prettyPrint)
+import Printing (prettyPrint, trimTree)
 import Cmd
 import Parser ( parseCmd, parseInput )
 import System.IO ( hFlush, stdout )
@@ -41,7 +41,7 @@ repl= do
     putStrLn "and then crows can eat your crops and you will lose points!"
     putStrLn""
     putStrLn""
-    tree <-geninftree
+    tree <-generateTree 5 
     let game = GameState {
       binZip = (Hole, tree),
       rocksCollected = 0,
@@ -50,11 +50,17 @@ repl= do
     go game tree
   where
     go :: GameState -> Bin Item -> IO ()
-    go gameState inittree= do
-        let (z2,z3) = binZip gameState
-        z4 <- generateCrops z3 0.01
-        (z5, neg) <- updateCrowEat z4 0 1000
-        let z = (z2,z4)
+    go gameState init= do
+        let (z2,z3') = binZip gameState
+        z3 <- replaceLeavesWithTree 5 (trimTree z3' 5) init
+        z4 <- generateCrops z3 0.05
+        (z5, neg) <- updateCrowEat (trimTree z4 5) 0 3
+        z6 <- populateEmptyNodes z5 2
+        if neg > 0 
+            then putStrLn $ "Oh NOOO the crows ate " ++ show neg ++ " crops"
+        else
+            putStr ""
+        let z = (z2,z6)
         prettyPrint z
         case z of
             (_, Leaf (_, Nothing)) -> putStrLn "You see an empty leaf."
@@ -70,16 +76,16 @@ repl= do
 
             Nothing -> do
                 putStrLn "I'm sorry, I do not understand."
-                go gameState inittree
+                go gameState init
 
             Just Go_Left ->
                 case z of
                     (c, Node a t1 t2) -> do
                         let newGameState = gameState { binZip = (B0 a c t2, t1), points = points gameState - neg}
-                        go newGameState inittree
+                        go newGameState init
                     (c, Leaf _) -> do
                         putStrLn "You cannot climb any further."
-                        go gameState inittree
+                        go gameState init
 
 
             Just Go_Right ->
@@ -87,20 +93,20 @@ repl= do
                     (c, Node a t1 t2) ->
                         do
                         let newGameState = gameState { binZip = (B1 a t1 c, t2), points = points gameState - neg}
-                        go newGameState inittree
+                        go newGameState init
                     (c, Leaf _) -> do
                         putStrLn "You cannot climb any further."
-                        go gameState inittree
+                        go gameState init
 
             Just Go_Back ->
                 case z of
                     (Hole, _) -> do
                         putStrLn "You are already at the root."
                         putStrLn "You cannot go back any further."
-                        go gameState inittree
+                        go gameState init
                     b -> do
                         let newGameState = gameState { binZip = go_back b, points = points gameState - neg }
-                        go newGameState inittree
+                        go newGameState init
 
 
 
@@ -112,11 +118,11 @@ repl= do
                         case result of
                             Just newTree -> do
                                 let newGameState = gameState { binZip = (fst z, newTree), rocksCollected = rocksCollected gameState + 1, points = points gameState - neg }
-                                go newGameState inittree
-                            Nothing -> go gameState inittree
+                                go newGameState init
+                            Nothing -> go gameState init
                     else do
                         putStrLn "You cannot collect more rocks. Limit reached."
-                        go gameState inittree
+                        go gameState init
 
 
             Just Do_Shoot -> do
@@ -124,8 +130,8 @@ repl= do
                 case result of
                     Just newTree -> do
                                 let newGameState = gameState { binZip = (fst z, newTree), rocksCollected = rocksCollected gameState-1, points = points gameState+1-neg}
-                                go newGameState inittree
-                    Nothing -> go gameState inittree
+                                go newGameState init
+                    Nothing -> go gameState init
 
 
             Just Quit -> do
