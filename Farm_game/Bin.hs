@@ -4,12 +4,6 @@
 module Bin where
 import System.Random ( randomIO, randomRIO )
 
-data Thing = Rock | Crow | NonExistant
-    deriving (Show, Eq)
-
-type Item = (Bool, Maybe Thing)
-
-data Bin a = Leaf a | Node a (Bin a) (Bin a)
     deriving (Show, Eq)
 
 data BinCxt a = Hole | B0 a (BinCxt a) (Bin a) | B1 a (Bin a) (BinCxt a)
