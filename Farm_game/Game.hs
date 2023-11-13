@@ -52,10 +52,12 @@ repl= do
     go :: GameState -> Bin Item -> IO ()
     go gameState init= do
         let (z2,z3') = binZip gameState
-        z3 <- replaceLeavesWithTree 5 (trimTree z3' 5) init
-        z4 <- generateCrops z3 0.05
-        (z5, neg) <- updateCrowEat (trimTree z4 5) 0 3
-        z6 <- populateEmptyNodes z5 2
+        z3 <-  generateCrops  (trimTree z3' 5) 0.05
+        let z5 = infinitree z3
+        let z6 = trimTree z5 5
+        let neg = 0
+        --(z5, neg) <- updateCrowEat (trimTree z4 5) 0 3
+        --z6 <- populateEmptyNodes z5 2
         if neg > 0 
             then putStrLn $ "Oh NOOO the crows ate " ++ show neg ++ " crops"
         else
