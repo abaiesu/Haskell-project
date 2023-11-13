@@ -382,8 +382,8 @@ step 6 : call prettyPrintHelper l c it dir
 -- TEST
 main :: IO ()
 main = do
-    let lists = [ [(Just Rock)], [(Just Spider), (Just Baby)], [Nothing, Nothing, (Just Rock) , (Just Rock)], [(Just Rock), (Just NonExistant), (Just NonExistant), (Just NonExistant), (Just NonExistant), (Just NonExistant), (Just NonExistant), (Just NonExistant)]]
+    let lists = [ [(Just Rock)], [(Just Rock), Nothing], [Nothing, Nothing, (Just Rock) , (Just Rock)], [(Just Rock), (Just NonExistant), (Just NonExistant), (Just NonExistant), (Just NonExistant), (Just NonExistant), (Just NonExistant), (Just NonExistant)]]
     
-    let cs = [[(Just Baby)], [Nothing, Nothing]]
+    let cs = [[(Just Rock)], [Nothing, Nothing]]
 
     prettyPrintHelper lists cs (Just Rock) 2
