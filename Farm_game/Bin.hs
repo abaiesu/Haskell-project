@@ -238,3 +238,27 @@ replaceLeavesWithTree depthThreshold (Node a left right) init = do
 
 
 
+-- Function to replace each leaf with the original tree
+replaceLeaves' :: Bin Item-> Bin Item-> Bin Item
+replaceLeaves' (Leaf _) replacement = replacement
+replaceLeaves' (Node a left right) replacement = Node a (replaceLeaves' left replacement) (replaceLeaves' right replacement)
+
+infinitree :: Bin Item-> Bin Item
+infinitree tree = replaceLeaves' tree (infinitree tree)
+
+
+
+-- Function to create an infinite binary tree where every leaf is replaced by the tree itself
+
+
+
+
+
+
+
+
+
+
+
+
+
