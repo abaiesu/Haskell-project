@@ -1,6 +1,6 @@
 
 import Bin
-import Printing (prettyPrint, trimTree)
+import Printing (prettyPrint, trimTree, maxDepth)
 import Cmd
 import Parser ( parseCmd, parseInput )
 import System.IO ( hFlush, stdout )
@@ -151,3 +151,13 @@ repl= do
 main :: IO ()
 main = repl
 
+tester :: IO()
+tester = do 
+    testree <- generateTree 3
+    let trimmed = trimTree testree 3
+    printLabels testree 
+    print ""
+    printLabels trimmed
+    print ""
+    print(testree == trimmed)
+    print (maxDepth trimmed)

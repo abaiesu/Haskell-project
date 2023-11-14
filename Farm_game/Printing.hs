@@ -15,7 +15,7 @@ trimTree (Node x left right) depth
 
 --Gets the max depth of a tree
 maxDepth :: Bin Item -> Int
-maxDepth (Leaf _) = 1
+maxDepth (Leaf _) = 0
 maxDepth (Node _ left right) = 1 + max (maxDepth left) (maxDepth right)
 
 -- Fills in the given tree to get a depth n 
@@ -29,7 +29,7 @@ balanceTree :: Bin Item -> Bin Item
 balanceTree (Leaf item) = Leaf item
 balanceTree (Node item left right) = Node item (fill left n) (fill right n)
   where
-    n = max (maxDepth left) (maxDepth right) -1 
+    n = max (maxDepth left) (maxDepth right) 
 
 
 
