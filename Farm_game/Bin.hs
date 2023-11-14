@@ -4,13 +4,12 @@
 module Bin where
 import System.Random ( randomIO, randomRIO )
 
-data Thing = Rock | Crow | NonExistant
-    deriving (Show, Eq)
+data Bin a = Leaf a | Node a (Bin a) (Bin a)  deriving (Show, Eq)
 
 type Item = (Bool, Maybe Thing)
 
-data Bin a = Leaf a | Node a (Bin a) (Bin a)
-    deriving (Show, Eq)
+data Thing = Rock | Crow | NonExistant  deriving (Show, Eq)
+
 
 data BinCxt a = Hole | B0 a (BinCxt a) (Bin a) | B1 a (Bin a) (BinCxt a)
     deriving (Show, Eq)
@@ -55,7 +54,7 @@ else do
     putStrLn "Nothing to collect"
     return Nothing
 
--- shoots a spider
+-- shoots a crow
 do_shoot :: Bin Item -> IO (Maybe (Bin Item))
 do_shoot node = if check_action Crow node
 then do
@@ -74,7 +73,7 @@ go_back (hole, t) = (hole, t)
 
 
 -- generate a random Item (Rock, Crow or Nothing) 
--- 1/2 proba of Nothing, 1/6 proba for Rock, 1/6 proba for Crow 1/6 for Spider
+-- 1/2 proba of Nothing, 1/4 proba for Rock, 1/4 proba for Crow
 randomItem :: IO Item
 randomItem = do
     randomNumber <- randomIO :: IO Int
@@ -156,7 +155,7 @@ populateEmptyNodes tree p = do
       randomNumber1 <- randomRIO (0.0, 1.0 :: Float)
       if randomNumber1 <= fromIntegral p / fromIntegral n --decide if we populate 
         then do
-            randomNumber2 <- randomRIO (0, 1 :: Int) --decide with what do we populate (Rock or Spider)
+            randomNumber2 <- randomRIO (0, 1 :: Int) --decide with what do we populate (Rock or Crow)
             let newItem = if randomNumber2 == 0
                             then Just Rock
                             else Just Crow

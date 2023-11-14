@@ -1,4 +1,4 @@
-module Printing where
+--module Printing where
 import Bin
 import System.Console.ANSI
 
@@ -89,7 +89,7 @@ setBackPrint color text = do
 checkIfExistant :: [Item] -> Int -> [Item] -> Int -> IO ()
 checkIfExistant l3 m l4 n = do
     let result
-          | snd (l3 !! m) == Just NonExistant = " "
+          | snd (l3 !! m) == Just NonExistant = "  "
           | snd (l4 !! n) == Just NonExistant = "+"
           | otherwise = "\\/"
     putStr result
@@ -138,7 +138,7 @@ prettyPrintHelper [l1, l2, l3, l4] [c1, c2] parent_item dir = do
           else putStr "            " --if there is no grand child, nothing
 
           checkIfExistant l3 1 l4 2 --check if grandchild 2 has children (2 and 3)
-          putStr $ replicate 13 ' '
+          putStr $ replicate 12 ' '
 
           checkIfExistant l3 2 l4 4 --check if grandchild 3 has children (4 and 5)
           if snd (l3 !! 2) /= Just NonExistant
@@ -502,9 +502,14 @@ step 6 : call prettyPrintHelper l c it dir
 -}
 
 
-smoltest :: IO()
-smoltest = do
-  tree <- generateTree 5
-  let treez = (Hole, tree)
-  prettyPrint treez 
-  putStrLn ""
+main :: IO ()
+main = do
+  let l = [[(False, Just Rock)], 
+            [(True, Just Crow), (True, Nothing)],
+            [(False, Just Rock), (False, Just Rock), (False, Nothing), (False, Nothing)],
+            [(False, Just NonExistant), (False, Just NonExistant), (False, Just Rock), (False, Just Rock), (False, Nothing), (False, Nothing), (False, Nothing), (False, Nothing)]]
+                   
+  let c = [[(False, Nothing)], 
+            [(False, Nothing), (False, Nothing)]]
+
+  prettyPrintHelper l c (Just Rock) 2

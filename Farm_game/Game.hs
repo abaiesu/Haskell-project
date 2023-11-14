@@ -140,7 +140,7 @@ repl= do
                 putStrLn "Okay."
                 putStrLn "You ended the game over here:\n"
                 prettyPrint z
-                putStrLn $ "Your points are" ++ show(points gameState)
+                putStrLn $ "Your points are " ++ show(points gameState)
                 return ()
 
 
