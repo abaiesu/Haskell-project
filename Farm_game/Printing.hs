@@ -1,4 +1,4 @@
---module Printing where
+module Printing where
 import Bin
 import System.Console.ANSI
 
@@ -501,6 +501,7 @@ step 6 : fuigure out if the sibling goes left or right = dir
 step 6 : call prettyPrintHelper l c it dir
 -}
 
+{-
 
 main :: IO ()
 main = do
@@ -513,3 +514,5 @@ main = do
             [(False, Nothing), (False, Nothing)]]
 
   prettyPrintHelper l c (Just Rock) 2
+
+  -}
