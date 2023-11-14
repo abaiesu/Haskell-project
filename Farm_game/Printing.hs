@@ -506,8 +506,8 @@ main :: IO ()
 main = do
   let l = [[(False, Just Rock)], 
             [(True, Just Crow), (True, Nothing)],
-            [(False, Just NonExistant), (False, Just NonExistant), (False, Nothing), (False, Nothing)],
-            [(False, Nothing), (False, Nothing), (False, Just NonExistant), (False, Just NonExistant), (False, Nothing), (False, Nothing), (False, Nothing), (False, Nothing)]]
+            [(False, Just Rock), (False, Just Rock), (False, Nothing), (False, Nothing)],
+            [(False, Just NonExistant), (False, Just NonExistant), (False, Just Rock), (False, Just Rock), (False, Nothing), (False, Nothing), (False, Nothing), (False, Nothing)]]
                    
   let c = [[(False, Nothing)], 
             [(False, Nothing), (False, Nothing)]]
